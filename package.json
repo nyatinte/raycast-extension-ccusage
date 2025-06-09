@@ -1,21 +1,21 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "claude-usage-monitor",
-  "title": "Claude Usage Monitor",
+  "name": "ccusage",
+  "title": "Ccusage",
   "description": "Monitor Claude Code usage with real-time tracking",
   "icon": "extension-icon.png",
   "author": "nyatinte",
   "license": "MIT",
   "commands": [
     {
-      "name": "claude-usage-monitor",
-      "title": "Claude Usage Monitor",
+      "name": "ccusage",
+      "title": "Ccusage",
       "description": "Monitor Claude Code usage with real-time tracking",
       "mode": "view"
     },
     {
-      "name": "menubar-claude-usage",
-      "title": "Menubar Claude Usage",
+      "name": "menubar-ccusage",
+      "title": "Menubar Ccusage",
       "description": "Show Claude usage in menu bar",
       "mode": "menu-bar"
     }

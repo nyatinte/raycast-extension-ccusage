@@ -3,7 +3,7 @@ import { useUsageStats, useCCUsageAvailability } from "./hooks/use-usage-data";
 import { DataFormatter } from "./utils/data-formatter";
 import { UsageCalculator } from "./utils/usage-calculator";
 
-export default function MenuBarClaudeUsage() {
+export default function MenuBarCCUsage() {
   const { isAvailable, isLoading: availabilityLoading } = useCCUsageAvailability();
   const stats = useUsageStats(1000); // 1 second refresh for menu bar
 
@@ -185,10 +185,10 @@ export default function MenuBarClaudeUsage() {
         <MenuBarExtra.Item
           title="Open Usage Monitor"
           icon={Icon.BarChart}
-          onAction={() => open("raycast://extensions/nyatinte/claude-usage-monitor/claude-usage-monitor")}
+          onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
         />
         <MenuBarExtra.Item
-          title="ccusage Repository"
+          title="Ccusage Repository"
           icon={Icon.Code}
           onAction={() => open("https://github.com/ryoppippi/ccusage")}
         />

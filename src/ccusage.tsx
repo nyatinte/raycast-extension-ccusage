@@ -9,7 +9,7 @@ interface Preferences {
   defaultView: string;
 }
 
-export default function ClaudeUsageMonitor() {
+export default function CCUsage() {
   const preferences = getPreferenceValues<Preferences>();
   const { isAvailable, isLoading: availabilityLoading } = useCCUsageAvailability();
   const stats = useUsageStats();
