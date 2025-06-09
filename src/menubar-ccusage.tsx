@@ -188,7 +188,7 @@ export default function MenuBarCCUsage() {
           onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
         />
         <MenuBarExtra.Item
-          title="Ccusage Repository"
+          title="ccusage Repository"
           icon={Icon.Code}
           onAction={() => open("https://github.com/ryoppippi/ccusage")}
         />
