@@ -7,10 +7,34 @@ const execAsync = promisify(exec);
 export class CCUsageIntegration {
   private static readonly CCUSAGE_COMMAND = "npx ccusage@latest";
 
+  private static getNodePaths(): string[] {
+    // Common Node.js installation paths
+    return [
+      "/usr/local/bin",
+      "/opt/homebrew/bin", // Homebrew on Apple Silicon
+      "/usr/bin",
+      "/bin",
+      `${process.env.HOME}/.npm-global/bin`,
+      `${process.env.HOME}/n/bin`, // n version manager
+      `${process.env.HOME}/.nvm/versions/node/*/bin`, // nvm
+      process.env.PATH || "",
+    ].join(":");
+  }
+
   static async executeCommand(args: string): Promise<CCUsageCommandResult> {
     try {
       const command = `${this.CCUSAGE_COMMAND} ${args}`;
-      const { stdout, stderr } = await execAsync(command);
+      const env = {
+        ...process.env,
+        PATH: this.getNodePaths(),
+        // Ensure npm global packages are available
+        NODE_PATH: `${process.env.HOME}/.npm-global/lib/node_modules:${process.env.NODE_PATH || ""}`,
+      };
+
+      const { stdout, stderr } = await execAsync(command, {
+        env,
+        shell: "/bin/bash", // Use bash shell explicitly
+      });
       return { stdout, stderr };
     } catch (error) {
       throw new Error(`Failed to execute ccusage command: ${error}`);

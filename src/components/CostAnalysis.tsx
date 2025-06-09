@@ -118,17 +118,17 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost by Model" />
-        {costBreakdown.breakdown.slice(0, 5).map((model) => (
+        {costBreakdown.breakdown.slice(0, 5).map((model, index) => (
           <List.Item.Detail.Metadata.Label
-            key={model.model}
+            key={`cost-${model.model || "unknown"}-${index}`}
             title={DataFormatter.formatModelName(model.model)}
             text={`${DataFormatter.formatCost(model.cost)} (${model.percentage})`}
             icon={
-              model.model.includes("opus")
+              (model.model || "").includes("opus")
                 ? Icon.Crown
-                : model.model.includes("sonnet")
+                : (model.model || "").includes("sonnet")
                   ? Icon.Sparkles
-                  : model.model.includes("haiku")
+                  : (model.model || "").includes("haiku")
                     ? Icon.Leaf
                     : Icon.Message
             }
@@ -139,9 +139,9 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
           <>
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label title="Token Distribution" />
-            {tokenBreakdown.breakdown.slice(0, 3).map((model) => (
+            {tokenBreakdown.breakdown.slice(0, 3).map((model, index) => (
               <List.Item.Detail.Metadata.Label
-                key={`token-${model.model}`}
+                key={`token-${model.model || "unknown"}-${index}`}
                 title={DataFormatter.formatModelName(model.model)}
                 text={`${DataFormatter.formatTokens(model.tokens)} (${model.percentage})`}
                 icon={Icon.Text}

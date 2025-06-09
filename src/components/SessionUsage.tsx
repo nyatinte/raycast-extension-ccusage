@@ -11,16 +11,18 @@ interface SessionUsageProps {
 
 export default function SessionUsage({ sessions, isLoading, error }: SessionUsageProps) {
   const getSessionIcon = (session: SessionData) => {
-    if (session.model.includes("opus")) return Icon.Crown;
-    if (session.model.includes("sonnet")) return Icon.Sparkles;
-    if (session.model.includes("haiku")) return Icon.Leaf;
+    const model = session.model || "";
+    if (model.includes("opus")) return Icon.Crown;
+    if (model.includes("sonnet")) return Icon.Sparkles;
+    if (model.includes("haiku")) return Icon.Leaf;
     return Icon.Message;
   };
 
   const getSessionIconColor = (session: SessionData) => {
-    if (session.model.includes("opus")) return Color.Purple;
-    if (session.model.includes("sonnet")) return Color.Blue;
-    if (session.model.includes("haiku")) return Color.Green;
+    const model = session.model || "";
+    if (model.includes("opus")) return Color.Purple;
+    if (model.includes("sonnet")) return Color.Blue;
+    if (model.includes("haiku")) return Color.Green;
     return Color.SecondaryText;
   };
 

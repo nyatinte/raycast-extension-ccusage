@@ -133,17 +133,17 @@ export default function MenuBarCCUsage() {
               subtitle={`${stats.recentSessions.length} sessions`}
               icon={Icon.List}
             />
-            {stats.recentSessions.slice(0, 3).map((session) => (
+            {stats.recentSessions.slice(0, 3).map((session, index) => (
               <MenuBarExtra.Item
-                key={session.sessionId || session.model}
+                key={session.sessionId || `${session.model}-${index}`}
                 title={DataFormatter.formatModelName(session.model)}
                 subtitle={`${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime)}`}
                 icon={
-                  session.model.includes("opus")
+                  (session.model || "").includes("opus")
                     ? Icon.Crown
-                    : session.model.includes("sonnet")
+                    : (session.model || "").includes("sonnet")
                       ? Icon.Sparkles
-                      : session.model.includes("haiku")
+                      : (session.model || "").includes("haiku")
                         ? Icon.Leaf
                         : Icon.Message
                 }
@@ -159,17 +159,17 @@ export default function MenuBarCCUsage() {
         {stats.topModels.length > 0 ? (
           stats.topModels
             .slice(0, 3)
-            .map((model) => (
+            .map((model, index) => (
               <MenuBarExtra.Item
-                key={model.model}
+                key={`top-model-${model.model || "unknown"}-${index}`}
                 title={DataFormatter.formatModelName(model.model)}
                 subtitle={`${DataFormatter.formatTokens(model.totalTokens)} • ${DataFormatter.formatCost(model.cost)}`}
                 icon={
-                  model.model.includes("opus")
+                  (model.model || "").includes("opus")
                     ? Icon.Crown
-                    : model.model.includes("sonnet")
+                    : (model.model || "").includes("sonnet")
                       ? Icon.Sparkles
-                      : model.model.includes("haiku")
+                      : (model.model || "").includes("haiku")
                         ? Icon.Leaf
                         : Icon.Message
                 }

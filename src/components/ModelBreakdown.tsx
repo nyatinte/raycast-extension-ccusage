@@ -1,3 +1,4 @@
+import React from "react";
 import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
 import { DataFormatter } from "../utils/data-formatter";
@@ -11,23 +12,26 @@ interface ModelBreakdownProps {
 
 export default function ModelBreakdown({ models, isLoading, error }: ModelBreakdownProps) {
   const getModelIcon = (model: string) => {
-    if (model.includes("opus")) return Icon.Crown;
-    if (model.includes("sonnet")) return Icon.Sparkles;
-    if (model.includes("haiku")) return Icon.Leaf;
+    const modelName = model || "";
+    if (modelName.includes("opus")) return Icon.Crown;
+    if (modelName.includes("sonnet")) return Icon.Sparkles;
+    if (modelName.includes("haiku")) return Icon.Leaf;
     return Icon.Message;
   };
 
   const getModelIconColor = (model: string) => {
-    if (model.includes("opus")) return Color.Purple;
-    if (model.includes("sonnet")) return Color.Blue;
-    if (model.includes("haiku")) return Color.Green;
+    const modelName = model || "";
+    if (modelName.includes("opus")) return Color.Purple;
+    if (modelName.includes("sonnet")) return Color.Blue;
+    if (modelName.includes("haiku")) return Color.Green;
     return Color.SecondaryText;
   };
 
   const getModelTier = (model: string): "Premium" | "Standard" | "Fast" | "Unknown" => {
-    if (model.includes("opus")) return "Premium";
-    if (model.includes("sonnet")) return "Standard";
-    if (model.includes("haiku")) return "Fast";
+    const modelName = model || "";
+    if (modelName.includes("opus")) return "Premium";
+    if (modelName.includes("sonnet")) return "Standard";
+    if (modelName.includes("haiku")) return "Fast";
     return "Unknown";
   };
 
@@ -143,9 +147,9 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
         {Object.entries(modelsByTier).map(
           ([tier, tierModels]) =>
             tierModels.length > 0 && (
-              <div key={tier}>
+              <React.Fragment key={tier}>
                 <List.Item.Detail.Metadata.Label title={`${tier} Models`} />
-                {tierModels.slice(0, 3).map((model) => {
+                {tierModels.slice(0, 3).map((model, index) => {
                   const percentage =
                     tokenBreakdown.totalTokens > 0
                       ? DataFormatter.formatPercentage(model.totalTokens, tokenBreakdown.totalTokens)
@@ -153,7 +157,7 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
 
                   return (
                     <List.Item.Detail.Metadata.Label
-                      key={model.model}
+                      key={`${tier}-${model.model || "unknown"}-${index}`}
                       title={DataFormatter.formatModelName(model.model)}
                       text={`${DataFormatter.formatTokens(model.totalTokens)} (${percentage}) • ${DataFormatter.formatCost(model.cost)} • ${model.sessionCount} sessions`}
                       icon={{ source: getModelIcon(model.model), tintColor: getModelIconColor(model.model) }}
@@ -161,7 +165,7 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
                   );
                 })}
                 <List.Item.Detail.Metadata.Separator />
-              </div>
+              </React.Fragment>
             ),
         )}
 
@@ -171,7 +175,7 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
 
           return (
             <List.Item.Detail.Metadata.Label
-              key={`top-${model.model}`}
+              key={`top-${model.model || "unknown"}-${index}`}
               title={`${index + 1}. ${DataFormatter.formatModelName(model.model)}`}
               text={`${DataFormatter.formatTokens(model.totalTokens)} • ${DataFormatter.formatCost(model.cost)} • $${costPerToken.toFixed(6)}/token`}
               icon={{ source: getModelIcon(model.model), tintColor: getModelIconColor(model.model) }}

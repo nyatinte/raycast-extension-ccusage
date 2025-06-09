@@ -75,7 +75,9 @@ export class DataFormatter {
     }
   }
 
-  static formatModelName(model: string): string {
+  static formatModelName(model: string | null | undefined): string {
+    if (!model) return "Unknown Model";
+
     const modelNames: Record<string, string> = {
       "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
       "claude-3-5-sonnet-20240620": "Claude 3.5 Sonnet (Legacy)",
