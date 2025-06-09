@@ -1,6 +1,5 @@
 import { List, Icon, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { useUsageStats, useCCUsageAvailability } from "./hooks/use-usage-data";
-import { DataFormatter } from "./utils/data-formatter";
 import DailyUsage from "./components/DailyUsage";
 import SessionUsage from "./components/SessionUsage";
 import CostAnalysis from "./components/CostAnalysis";
@@ -28,10 +27,7 @@ export default function ClaudeUsageMonitor() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Install ccusage"
-                url="https://github.com/ryoppippi/ccusage"
-              />
+              <Action.OpenInBrowser title="Install Ccusage" url="https://github.com/ryoppippi/ccusage" />
             </ActionPanel>
           }
         />
@@ -43,28 +39,16 @@ export default function ClaudeUsageMonitor() {
 
   return (
     <List isLoading={stats.isLoading} selectedItemId={selectedItemId} isShowingDetail>
-      <DailyUsage 
-        dailyUsage={stats.todayUsage}
-        isLoading={stats.isLoading}
-        error={stats.error}
-      />
-      <SessionUsage 
-        sessions={stats.recentSessions}
-        isLoading={stats.isLoading}
-        error={stats.error}
-      />
-      <CostAnalysis 
+      <DailyUsage dailyUsage={stats.todayUsage} isLoading={stats.isLoading} error={stats.error} />
+      <SessionUsage sessions={stats.recentSessions} isLoading={stats.isLoading} error={stats.error} />
+      <CostAnalysis
         totalUsage={stats.totalUsage}
         dailyUsage={stats.todayUsage}
         models={stats.topModels}
         isLoading={stats.isLoading}
         error={stats.error}
       />
-      <ModelBreakdown 
-        models={stats.topModels}
-        isLoading={stats.isLoading}
-        error={stats.error}
-      />
+      <ModelBreakdown models={stats.topModels} isLoading={stats.isLoading} error={stats.error} />
     </List>
   );
 }

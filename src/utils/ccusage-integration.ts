@@ -21,14 +21,14 @@ export class CCUsageIntegration {
     try {
       const dateArg = date ? `--since ${date} --until ${date}` : "";
       const result = await this.executeCommand(`daily ${dateArg} --json`);
-      
+
       if (!result.stdout.trim()) {
         return null;
       }
 
       const data: CCUsageOutput = JSON.parse(result.stdout);
       return {
-        date: data.date || new Date().toISOString().split('T')[0],
+        date: data.date || new Date().toISOString().split("T")[0],
         inputTokens: data.inputTokens || 0,
         outputTokens: data.outputTokens || 0,
         totalTokens: data.totalTokens || 0,
@@ -40,10 +40,15 @@ export class CCUsageIntegration {
     }
   }
 
-  static async getTotalUsage(): Promise<{ inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null> {
+  static async getTotalUsage(): Promise<{
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    cost: number;
+  } | null> {
     try {
       const result = await this.executeCommand("--json");
-      
+
       if (!result.stdout.trim()) {
         return null;
       }
@@ -64,7 +69,7 @@ export class CCUsageIntegration {
   static async getSessionUsage(): Promise<SessionData[]> {
     try {
       const result = await this.executeCommand("session --json");
-      
+
       if (!result.stdout.trim()) {
         return [];
       }
@@ -81,7 +86,7 @@ export class CCUsageIntegration {
     try {
       const untilArg = until ? `--until ${until}` : "";
       const result = await this.executeCommand(`--since ${since} ${untilArg} --json`);
-      
+
       if (!result.stdout.trim()) {
         return null;
       }
@@ -103,7 +108,7 @@ export class CCUsageIntegration {
 
       // Group sessions by model for model breakdown
       const modelMap = new Map();
-      sessions.forEach(session => {
+      sessions.forEach((session) => {
         const existing = modelMap.get(session.model) || {
           model: session.model,
           inputTokens: 0,
@@ -112,13 +117,13 @@ export class CCUsageIntegration {
           cost: 0,
           sessionCount: 0,
         };
-        
+
         existing.inputTokens += session.inputTokens;
         existing.outputTokens += session.outputTokens;
         existing.totalTokens += session.totalTokens;
         existing.cost += session.cost;
         existing.sessionCount += 1;
-        
+
         modelMap.set(session.model, existing);
       });
 
@@ -145,7 +150,7 @@ export class CCUsageIntegration {
     try {
       await this.executeCommand("--help");
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

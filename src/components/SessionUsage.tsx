@@ -28,7 +28,7 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
     if (error) {
       return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
     }
-    
+
     if (!sessions || sessions.length === 0) {
       return [{ text: "No sessions", icon: Icon.Circle }];
     }
@@ -54,16 +54,9 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
     if (!sessions || sessions.length === 0) {
       return (
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label 
-            title="Status" 
-            text="No recent sessions found" 
-            icon={Icon.Circle} 
-          />
+          <List.Item.Detail.Metadata.Label title="Status" text="No recent sessions found" icon={Icon.Circle} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label 
-            title="Note" 
-            text="Sessions will appear here after using Claude Code" 
-          />
+          <List.Item.Detail.Metadata.Label title="Note" text="Sessions will appear here after using Claude Code" />
         </List.Item.Detail.Metadata>
       );
     }
@@ -74,44 +67,44 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
 
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label 
-          title="Recent Sessions" 
+        <List.Item.Detail.Metadata.Label
+          title="Recent Sessions"
           text={`${sessions.length} sessions`}
           icon={Icon.List}
         />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Session Statistics" />
-        <List.Item.Detail.Metadata.Label 
-          title="Average Cost per Session" 
-          text={DataFormatter.formatCost(averageCost)} 
+        <List.Item.Detail.Metadata.Label
+          title="Average Cost per Session"
+          text={DataFormatter.formatCost(averageCost)}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Average Tokens per Session" 
-          text={DataFormatter.formatTokens(averageTokens)} 
+        <List.Item.Detail.Metadata.Label
+          title="Average Tokens per Session"
+          text={DataFormatter.formatTokens(averageTokens)}
         />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
-        <List.Item.Detail.Metadata.Label 
-          title="Avg Input/Output Ratio" 
-          text={`${efficiency.averageInputOutputRatio.toFixed(2)}x`} 
+        <List.Item.Detail.Metadata.Label
+          title="Avg Input/Output Ratio"
+          text={`${efficiency.averageInputOutputRatio.toFixed(2)}x`}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Cost per Output Token" 
-          text={`$${efficiency.averageCostPerOutput.toFixed(6)}`} 
+        <List.Item.Detail.Metadata.Label
+          title="Cost per Output Token"
+          text={`$${efficiency.averageCostPerOutput.toFixed(6)}`}
         />
         {efficiency.mostEfficientModel && (
-          <List.Item.Detail.Metadata.Label 
-            title="Most Efficient Model" 
-            text={DataFormatter.formatModelName(efficiency.mostEfficientModel)} 
+          <List.Item.Detail.Metadata.Label
+            title="Most Efficient Model"
+            text={DataFormatter.formatModelName(efficiency.mostEfficientModel)}
           />
         )}
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Latest Sessions" />
         {sessions.slice(0, 5).map((session, index) => (
-          <List.Item.Detail.Metadata.Label 
+          <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
             title={`Session ${index + 1}`}
             text={`${DataFormatter.formatModelName(session.model)} • ${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime)}`}
@@ -129,24 +122,11 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
       subtitle={sessions && sessions.length > 0 ? `${sessions.length} recent sessions` : "No sessions"}
       icon={Icon.List}
       accessories={getAccessories()}
-      detail={
-        <List.Item.Detail
-          isLoading={isLoading}
-          metadata={getDetailMetadata()}
-        />
-      }
+      detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open Claude Code"
-            url="https://claude.ai/code"
-            icon={Icon.Globe}
-          />
-          <Action.OpenInBrowser
-            title="View Session Data"
-            url="https://claude.ai/code"
-            icon={Icon.Clock}
-          />
+          <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
+          <Action.OpenInBrowser title="View Session Data" url="https://claude.ai/code" icon={Icon.Clock} />
         </ActionPanel>
       }
     />

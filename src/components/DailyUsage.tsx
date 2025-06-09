@@ -12,7 +12,7 @@ interface DailyUsageProps {
 export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageProps) {
   const getTrendIcon = (usage: DailyUsageData | null) => {
     if (!usage) return Icon.Calendar;
-    
+
     const intensity = UsageCalculator.getUsageIntensity(usage.totalTokens);
     switch (intensity) {
       case "Low":
@@ -30,7 +30,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
 
   const getTrendColor = (usage: DailyUsageData | null) => {
     if (!usage) return Color.SecondaryText;
-    
+
     const intensity = UsageCalculator.getUsageIntensity(usage.totalTokens);
     switch (intensity) {
       case "Low":
@@ -50,7 +50,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
     if (error) {
       return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
     }
-    
+
     if (!dailyUsage) {
       return [{ text: "No usage today", icon: Icon.Calendar }];
     }
@@ -73,16 +73,9 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
     if (!dailyUsage) {
       return (
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label 
-            title="Status" 
-            text="No usage recorded for today" 
-            icon={Icon.Calendar} 
-          />
+          <List.Item.Detail.Metadata.Label title="Status" text="No usage recorded for today" icon={Icon.Calendar} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label 
-            title="Date" 
-            text={new Date().toLocaleDateString()} 
-          />
+          <List.Item.Detail.Metadata.Label title="Date" text={new Date().toLocaleDateString()} />
         </List.Item.Detail.Metadata>
       );
     }
@@ -93,47 +86,41 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
 
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label 
-          title="Date" 
-          text={DataFormatter.formatDate(dailyUsage.date)} 
+        <List.Item.Detail.Metadata.Label
+          title="Date"
+          text={DataFormatter.formatDate(dailyUsage.date)}
           icon={Icon.Calendar}
         />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Token Usage" />
-        <List.Item.Detail.Metadata.Label 
-          title="Input Tokens" 
-          text={DataFormatter.formatTokens(dailyUsage.inputTokens)} 
+        <List.Item.Detail.Metadata.Label
+          title="Input Tokens"
+          text={DataFormatter.formatTokens(dailyUsage.inputTokens)}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Output Tokens" 
-          text={DataFormatter.formatTokens(dailyUsage.outputTokens)} 
+        <List.Item.Detail.Metadata.Label
+          title="Output Tokens"
+          text={DataFormatter.formatTokens(dailyUsage.outputTokens)}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Total Tokens" 
-          text={DataFormatter.formatTokens(dailyUsage.totalTokens)} 
+        <List.Item.Detail.Metadata.Label
+          title="Total Tokens"
+          text={DataFormatter.formatTokens(dailyUsage.totalTokens)}
         />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Cost Analysis" />
-        <List.Item.Detail.Metadata.Label 
-          title="Total Cost" 
-          text={DataFormatter.formatCost(dailyUsage.cost)} 
+        <List.Item.Detail.Metadata.Label
+          title="Total Cost"
+          text={DataFormatter.formatCost(dailyUsage.cost)}
           icon={Icon.Coins}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Cost per Token" 
-          text={costPerToken} 
-        />
+        <List.Item.Detail.Metadata.Label title="Cost per Token" text={costPerToken} />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
-        <List.Item.Detail.Metadata.Label 
-          title="Output/Input Ratio" 
-          text={efficiency} 
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Usage Intensity" 
+        <List.Item.Detail.Metadata.Label title="Output/Input Ratio" text={efficiency} />
+        <List.Item.Detail.Metadata.Label
+          title="Usage Intensity"
           text={intensity}
           icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
         />
@@ -148,21 +135,12 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
       subtitle={dailyUsage ? `${DataFormatter.formatTokens(dailyUsage.totalTokens)} tokens` : "No usage today"}
       icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
       accessories={getAccessories()}
-      detail={
-        <List.Item.Detail
-          isLoading={isLoading}
-          metadata={getDetailMetadata()}
-        />
-      }
+      detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
           <Action.OpenInBrowser
-            title="Open Claude Code"
-            url="https://claude.ai/code"
-            icon={Icon.Globe}
-          />
-          <Action.OpenInBrowser
-            title="View ccusage Repository"
+            title="View Ccusage Repository"
             url="https://github.com/ryoppippi/ccusage"
             icon={Icon.Code}
           />

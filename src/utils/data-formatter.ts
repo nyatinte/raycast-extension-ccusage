@@ -1,7 +1,7 @@
 export class DataFormatter {
   static formatTokens(tokens: number | null | undefined): string {
     if (tokens === null || tokens === undefined) return "0";
-    
+
     if (tokens < 1000) {
       return tokens.toString();
     } else if (tokens < 1000000) {
@@ -13,7 +13,7 @@ export class DataFormatter {
 
   static formatCost(cost: number | null | undefined): string {
     if (cost === null || cost === undefined) return "$0.00";
-    
+
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -68,7 +68,7 @@ export class DataFormatter {
       if (diffMins < 60) return `${diffMins}m ago`;
       if (diffHours < 24) return `${diffHours}h ago`;
       if (diffDays < 7) return `${diffDays}d ago`;
-      
+
       return this.formatDate(dateString);
     } catch {
       return dateString;

@@ -18,7 +18,7 @@ export function useUsageData(refreshInterval: number = 5000) {
         models: [],
         lastUpdated: new Date().toISOString(),
       },
-    }
+    },
   );
 
   useInterval(() => {
@@ -34,12 +34,9 @@ export function useUsageData(refreshInterval: number = 5000) {
 }
 
 export function useDailyUsage(refreshInterval: number = 10000) {
-  const { data, isLoading, error, revalidate } = usePromise(
-    async () => {
-      return CCUsageIntegration.getDailyUsage();
-    },
-    []
-  );
+  const { data, isLoading, error, revalidate } = usePromise(async () => {
+    return CCUsageIntegration.getDailyUsage();
+  }, []);
 
   useInterval(() => {
     revalidate();
@@ -49,12 +46,9 @@ export function useDailyUsage(refreshInterval: number = 10000) {
 }
 
 export function useTotalUsage(refreshInterval: number = 30000) {
-  const { data, isLoading, error, revalidate } = usePromise(
-    async () => {
-      return CCUsageIntegration.getTotalUsage();
-    },
-    []
-  );
+  const { data, isLoading, error, revalidate } = usePromise(async () => {
+    return CCUsageIntegration.getTotalUsage();
+  }, []);
 
   useInterval(() => {
     revalidate();
@@ -64,12 +58,9 @@ export function useTotalUsage(refreshInterval: number = 30000) {
 }
 
 export function useSessionUsage(refreshInterval: number = 15000) {
-  const { data, isLoading, error, revalidate } = usePromise(
-    async () => {
-      return CCUsageIntegration.getSessionUsage();
-    },
-    []
-  );
+  const { data, isLoading, error, revalidate } = usePromise(async () => {
+    return CCUsageIntegration.getSessionUsage();
+  }, []);
 
   useInterval(() => {
     revalidate();
@@ -92,7 +83,7 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
         models: [],
         lastUpdated: new Date().toISOString(),
       },
-    }
+    },
   );
 
   useInterval(() => {
@@ -115,12 +106,14 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
 }
 
 export function useCCUsageAvailability() {
-  const { data: isAvailable, isLoading, error, revalidate } = usePromise(
-    async () => {
-      return CCUsageIntegration.checkCCUsageAvailable();
-    },
-    []
-  );
+  const {
+    data: isAvailable,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(async () => {
+    return CCUsageIntegration.checkCCUsageAvailable();
+  }, []);
 
   return {
     isAvailable: isAvailable ?? false,
@@ -131,12 +124,9 @@ export function useCCUsageAvailability() {
 }
 
 export function useUsageByPeriod(since: string, until?: string, refreshInterval: number = 60000) {
-  const { data, isLoading, error, revalidate } = usePromise(
-    async () => {
-      return CCUsageIntegration.getUsageByPeriod(since, until);
-    },
-    [since, until]
-  );
+  const { data, isLoading, error, revalidate } = usePromise(async () => {
+    return CCUsageIntegration.getUsageByPeriod(since, until);
+  }, [since, until]);
 
   useInterval(() => {
     revalidate();
