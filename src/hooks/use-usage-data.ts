@@ -21,9 +21,10 @@ export function useUsageData(refreshInterval: number = 5000) {
     },
   );
 
-  useInterval(() => {
-    revalidate();
-  }, refreshInterval);
+  // Disable automatic refresh - data is fetched once on mount
+  // useInterval(() => {
+  //   revalidate();
+  // }, refreshInterval);
 
   return {
     data,
@@ -70,41 +71,19 @@ export function useSessionUsage(refreshInterval: number = 15000) {
 }
 
 export function useUsageStats(refreshInterval: number = 5000): UsageStats & { revalidate: () => void } {
-  console.log(`[DEBUG] useUsageStats: Hook initialized with refresh interval ${refreshInterval}ms`);
-  
-  const { data, isLoading, error, revalidate } = usePromise<UsageData>(
+  const { data, isLoading, error, revalidate } = usePromise(
     async () => {
-      console.log(`[DEBUG] useUsageStats: Fetching usage data...`);
-      const result = await CCUsageIntegration.getAllUsageData();
-      console.log(`[DEBUG] useUsageStats: Received data:`, result);
-      return result;
+      return await CCUsageIntegration.getAllUsageData();
     },
-    [],
-    {
-      initialData: {
-        daily: null,
-        total: null,
-        sessions: [],
-        models: [],
-        lastUpdated: new Date().toISOString(),
-      },
-    },
+    []
   );
 
-  useInterval(() => {
-    console.log(`[DEBUG] useUsageStats: Interval triggered, revalidating...`);
-    revalidate();
-  }, refreshInterval);
-
-  console.log(`[DEBUG] useUsageStats: Current state:`, {
-    isLoading,
-    hasError: !!error,
-    hasData: !!data,
-    dataDaily: data?.daily,
-    dataTotal: data?.total,
-    sessionsLength: data?.sessions?.length || 0,
-    modelsLength: data?.models?.length || 0
-  });
+  // Enable automatic refresh only for MenuBar (1000ms interval), disable for main view
+  if (refreshInterval <= 1000) {
+    useInterval(() => {
+      revalidate();
+    }, refreshInterval);
+  }
 
   const stats: UsageStats = {
     todayUsage: data?.daily || null,
@@ -112,16 +91,9 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
     recentSessions: data?.sessions ? UsageCalculator.getRecentSessions(data.sessions, 5) : [],
     topModels: data?.models ? UsageCalculator.getTopModels(data.models, 3) : [],
     isLoading,
-    error: error?.message || data?.error,
+    error: error?.message || (data as unknown as { error?: string })?.error,
   };
 
-  console.log(`[DEBUG] useUsageStats: Processed stats:`, {
-    hasTodayUsage: !!stats.todayUsage,
-    hasTotalUsage: !!stats.totalUsage,
-    recentSessionsCount: stats.recentSessions.length,
-    topModelsCount: stats.topModels.length,
-    error: stats.error
-  });
 
   return {
     ...stats,
@@ -150,7 +122,7 @@ export function useCCUsageAvailability() {
 export function useUsageByPeriod(since: string, until?: string, refreshInterval: number = 60000) {
   const { data, isLoading, error, revalidate } = usePromise(async () => {
     return CCUsageIntegration.getUsageByPeriod(since, until);
-  }, [since, until]);
+  }, []);
 
   useInterval(() => {
     revalidate();

@@ -2,6 +2,8 @@
 
 **REPLY IN JAPANESE**
 
+"Always update the CLAUDE.md file appropriately to reflect the instruction content when there are instructions like 'In the project, please do ○○.'"
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
@@ -100,3 +102,24 @@ The extension requires the `ccusage` npm package to be available via `npx ccusag
 - Menu bar file: `menubar-ccusage.tsx` (matches command name)
 - Utilities organized by purpose: `ccusage-integration.ts`, `data-formatter.ts`, `usage-calculator.ts`
 - React hooks in dedicated `hooks/` directory with `use-` prefix
+
+## Development Guidelines
+
+### Git Workflow
+
+- **Commit Messages**: Always write commit messages in English
+- **Commit Structure**: Use conventional commit format with descriptive subject lines
+- **Change Separation**: Split logical changes into separate commits for better tracking
+- **Debug Code**: Remove debug logs before committing to maintain clean production code
+
+### UI/UX Principles  
+
+- **Simplified Titles**: Use concise titles in left panel (e.g., "Today (2025-06-11)", "Sessions", "Models", "Costs")
+- **Efficient Refresh**: Main view uses one-time data fetching, MenuBar maintains real-time updates (1s interval)
+- **Responsive Design**: Optimize for limited screen space in Raycast interface
+
+### Code Quality
+
+- **TypeScript**: Maintain strict typing throughout the codebase
+- **Error Handling**: Gracefully handle null/undefined states in UI components
+- **Performance**: Use selective refresh intervals based on component requirements

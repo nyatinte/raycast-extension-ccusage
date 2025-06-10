@@ -120,8 +120,8 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
   return (
     <List.Item
       id="sessions"
-      title="Recent Sessions"
-      subtitle={sessions && sessions.length > 0 ? `${sessions.length} recent sessions` : "No sessions"}
+      title="Sessions"
+      subtitle={sessions && sessions.length > 0 ? `${sessions.length} sessions` : "No sessions"}
       icon={Icon.List}
       accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}

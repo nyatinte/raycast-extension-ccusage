@@ -189,7 +189,7 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
   return (
     <List.Item
       id="model-breakdown"
-      title="Model Breakdown"
+      title="Models"
       subtitle={models && models.length > 0 ? `${models.length} models used` : "No model data"}
       icon={Icon.BarChart}
       accessories={getAccessories()}

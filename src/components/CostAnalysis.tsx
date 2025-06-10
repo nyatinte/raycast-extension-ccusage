@@ -158,7 +158,7 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
   return (
     <List.Item
       id="cost-analysis"
-      title="Cost Analysis"
+      title="Costs"
       subtitle={totalUsage ? `Total: ${DataFormatter.formatCost(totalUsage.cost)}` : "No cost data"}
       icon={{ source: getCostIcon(mainCost), tintColor: getCostColor(mainCost) }}
       accessories={getAccessories()}

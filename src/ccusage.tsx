@@ -10,28 +10,15 @@ interface Preferences {
 }
 
 export default function CCUsage() {
-  console.log(`[DEBUG] CCUsage: Component rendering...`);
-  
   const preferences = getPreferenceValues<Preferences>();
   const { isAvailable, isLoading: availabilityLoading } = useCCUsageAvailability();
   const stats = useUsageStats();
 
-  console.log(`[DEBUG] CCUsage: Availability check:`, {
-    isAvailable,
-    availabilityLoading,
-    statsLoading: stats.isLoading,
-    statsError: stats.error,
-    hasTodayUsage: !!stats.todayUsage,
-    hasTotalUsage: !!stats.totalUsage
-  });
-
   if (availabilityLoading) {
-    console.log(`[DEBUG] CCUsage: Showing availability loading state`);
     return <List isLoading={true} />;
   }
 
   if (!isAvailable) {
-    console.log(`[DEBUG] CCUsage: ccusage not available`);
     return (
       <List>
         <List.Item

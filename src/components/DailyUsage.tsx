@@ -131,8 +131,8 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
   return (
     <List.Item
       id="daily"
-      title="Today's Usage"
-      subtitle={dailyUsage ? `${DataFormatter.formatTokens(dailyUsage.totalTokens)} tokens` : "No usage today"}
+      title={dailyUsage ? `Today (${dailyUsage.date})` : "Today"}
+      subtitle={dailyUsage ? `${DataFormatter.formatTokens(dailyUsage.totalTokens)} tokens • ${DataFormatter.formatCost(dailyUsage.cost)}` : "No usage today"}
       icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
       accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
