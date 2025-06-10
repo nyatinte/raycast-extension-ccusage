@@ -107,8 +107,8 @@ The extension requires the `ccusage` npm package to be available via `npx ccusag
 
 ### Git Workflow
 
-- **Commit Messages**: Always write commit messages in English
-- **Commit Structure**: Use conventional commit format with descriptive subject lines
+- **Commit Messages**: Always write commit messages in English using conventional commit format
+- **Commit Types**: Use appropriate prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `perf:`, `test:`, `chore:`)
 - **Change Separation**: Split logical changes into separate commits for better tracking
 - **Debug Code**: Remove debug logs before committing to maintain clean production code
 
