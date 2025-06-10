@@ -24,42 +24,87 @@ export class CCUsageIntegration {
   static async executeCommand(args: string): Promise<CCUsageCommandResult> {
     try {
       const command = `${this.CCUSAGE_COMMAND} ${args}`;
+      console.log(`[DEBUG] Executing command: ${command}`);
+      
       const env = {
         ...process.env,
         PATH: this.getNodePaths(),
         // Ensure npm global packages are available
         NODE_PATH: `${process.env.HOME}/.npm-global/lib/node_modules:${process.env.NODE_PATH || ""}`,
       };
+      
+      console.log(`[DEBUG] PATH: ${env.PATH}`);
+      console.log(`[DEBUG] NODE_PATH: ${env.NODE_PATH}`);
 
       const { stdout, stderr } = await execAsync(command, {
         env,
         shell: "/bin/bash", // Use bash shell explicitly
       });
+      
+      console.log(`[DEBUG] Command stdout:`, stdout);
+      console.log(`[DEBUG] Command stderr:`, stderr);
+      
       return { stdout, stderr };
     } catch (error) {
+      console.error(`[DEBUG] Command execution failed:`, error);
       throw new Error(`Failed to execute ccusage command: ${error}`);
     }
   }
 
   static async getDailyUsage(date?: string): Promise<DailyUsageData | null> {
     try {
+      console.log(`[DEBUG] getDailyUsage called with date: ${date}`);
       const dateArg = date ? `--since ${date} --until ${date}` : "";
       const result = await this.executeCommand(`daily ${dateArg} --json`);
 
       if (!result.stdout.trim()) {
+        console.log(`[DEBUG] getDailyUsage: No stdout received`);
         return null;
       }
 
       const data: CCUsageOutput = JSON.parse(result.stdout);
-      return {
-        date: data.date || new Date().toISOString().split("T")[0],
-        inputTokens: data.inputTokens || 0,
-        outputTokens: data.outputTokens || 0,
-        totalTokens: data.totalTokens || 0,
-        cost: data.cost || 0,
-      };
+      console.log(`[DEBUG] getDailyUsage parsed data:`, data);
+      
+      // Get today's date
+      const today = new Date().toISOString().split("T")[0];
+      
+      // Find today's usage from daily array or use totals as fallback
+      let todayUsage: DailyUsageData | null = null;
+      
+      if (data.daily && data.daily.length > 0) {
+        // Find today's entry in the daily array
+        const todayEntry = data.daily.find(d => d.date === today);
+        if (todayEntry) {
+          todayUsage = {
+            ...todayEntry,
+            cost: todayEntry.totalCost || todayEntry.cost || 0
+          };
+        } else {
+          // Use the latest entry if today's entry not found
+          const latest = data.daily[data.daily.length - 1];
+          todayUsage = {
+            ...latest,
+            cost: latest.totalCost || latest.cost || 0
+          };
+        }
+      } else if (data.totals) {
+        // Fallback to totals if no daily data
+        todayUsage = {
+          date: today,
+          inputTokens: data.totals.inputTokens || 0,
+          outputTokens: data.totals.outputTokens || 0,
+          cacheCreationTokens: data.totals.cacheCreationTokens,
+          cacheReadTokens: data.totals.cacheReadTokens,
+          totalTokens: data.totals.totalTokens || 0,
+          totalCost: data.totals.totalCost,
+          cost: data.totals.totalCost || 0,
+        };
+      }
+      
+      console.log(`[DEBUG] getDailyUsage returning:`, todayUsage);
+      return todayUsage;
     } catch (error) {
-      console.error("Failed to get daily usage:", error);
+      console.error("[DEBUG] Failed to get daily usage:", error);
       return null;
     }
   }
@@ -71,37 +116,72 @@ export class CCUsageIntegration {
     cost: number;
   } | null> {
     try {
+      console.log(`[DEBUG] getTotalUsage called`);
       const result = await this.executeCommand("--json");
 
       if (!result.stdout.trim()) {
+        console.log(`[DEBUG] getTotalUsage: No stdout received`);
         return null;
       }
 
       const data: CCUsageOutput = JSON.parse(result.stdout);
-      return {
-        inputTokens: data.inputTokens || 0,
-        outputTokens: data.outputTokens || 0,
-        totalTokens: data.totalTokens || 0,
-        cost: data.cost || 0,
-      };
+      console.log(`[DEBUG] getTotalUsage parsed data:`, data);
+      
+      let totalUsage = null;
+      
+      if (data.totals) {
+        totalUsage = {
+          inputTokens: data.totals.inputTokens || 0,
+          outputTokens: data.totals.outputTokens || 0,
+          totalTokens: data.totals.totalTokens || 0,
+          cost: data.totals.totalCost || 0,
+        };
+      } else {
+        // Fallback to legacy fields
+        totalUsage = {
+          inputTokens: data.inputTokens || 0,
+          outputTokens: data.outputTokens || 0,
+          totalTokens: data.totalTokens || 0,
+          cost: data.cost || 0,
+        };
+      }
+      
+      console.log(`[DEBUG] getTotalUsage returning:`, totalUsage);
+      return totalUsage;
     } catch (error) {
-      console.error("Failed to get total usage:", error);
+      console.error("[DEBUG] Failed to get total usage:", error);
       return null;
     }
   }
 
   static async getSessionUsage(): Promise<SessionData[]> {
     try {
+      console.log(`[DEBUG] getSessionUsage called`);
       const result = await this.executeCommand("session --json");
 
       if (!result.stdout.trim()) {
+        console.log(`[DEBUG] getSessionUsage: No stdout received`);
         return [];
       }
 
       const data: CCUsageOutput = JSON.parse(result.stdout);
-      return data.sessions || [];
+      console.log(`[DEBUG] getSessionUsage parsed data:`, data);
+      
+      const sessions = data.sessions || [];
+      
+      // Process sessions to add compatibility fields
+      const processedSessions = sessions.map(session => ({
+        ...session,
+        cost: session.totalCost || session.cost || 0,
+        startTime: session.lastActivity,
+        model: session.model || "claude-3-5-sonnet-20241022", // Default model assumption
+        projectName: session.projectPath?.split('/').pop() || 'Unknown Project'
+      }));
+      
+      console.log(`[DEBUG] getSessionUsage returning ${processedSessions.length} sessions:`, processedSessions.slice(0, 2));
+      return processedSessions;
     } catch (error) {
-      console.error("Failed to get session usage:", error);
+      console.error("[DEBUG] Failed to get session usage:", error);
       return [];
     }
   }
@@ -124,11 +204,20 @@ export class CCUsageIntegration {
 
   static async getAllUsageData(): Promise<UsageData> {
     try {
+      console.log(`[DEBUG] getAllUsageData: Starting to fetch all usage data`);
+      
       const [dailyUsage, totalUsage, sessions] = await Promise.all([
         this.getDailyUsage(),
         this.getTotalUsage(),
         this.getSessionUsage(),
       ]);
+
+      console.log(`[DEBUG] getAllUsageData results:`, {
+        dailyUsage,
+        totalUsage,
+        sessionCount: sessions.length,
+        sessions: sessions.slice(0, 3) // Show first 3 sessions for debugging
+      });
 
       // Group sessions by model for model breakdown
       const modelMap = new Map();
@@ -151,14 +240,24 @@ export class CCUsageIntegration {
         modelMap.set(session.model, existing);
       });
 
-      return {
+      const finalData = {
         daily: dailyUsage,
         total: totalUsage,
         sessions: sessions.slice(0, 10), // Latest 10 sessions
         models: Array.from(modelMap.values()),
         lastUpdated: new Date().toISOString(),
       };
+      
+      console.log(`[DEBUG] getAllUsageData final result:`, {
+        hasDaily: !!finalData.daily,
+        hasTotal: !!finalData.total,
+        sessionCount: finalData.sessions.length,
+        modelCount: finalData.models.length
+      });
+      
+      return finalData;
     } catch (error) {
+      console.error(`[DEBUG] getAllUsageData error:`, error);
       return {
         daily: null,
         total: null,

@@ -70,9 +70,14 @@ export function useSessionUsage(refreshInterval: number = 15000) {
 }
 
 export function useUsageStats(refreshInterval: number = 5000): UsageStats & { revalidate: () => void } {
+  console.log(`[DEBUG] useUsageStats: Hook initialized with refresh interval ${refreshInterval}ms`);
+  
   const { data, isLoading, error, revalidate } = usePromise<UsageData>(
     async () => {
-      return CCUsageIntegration.getAllUsageData();
+      console.log(`[DEBUG] useUsageStats: Fetching usage data...`);
+      const result = await CCUsageIntegration.getAllUsageData();
+      console.log(`[DEBUG] useUsageStats: Received data:`, result);
+      return result;
     },
     [],
     {
@@ -87,8 +92,19 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
   );
 
   useInterval(() => {
+    console.log(`[DEBUG] useUsageStats: Interval triggered, revalidating...`);
     revalidate();
   }, refreshInterval);
+
+  console.log(`[DEBUG] useUsageStats: Current state:`, {
+    isLoading,
+    hasError: !!error,
+    hasData: !!data,
+    dataDaily: data?.daily,
+    dataTotal: data?.total,
+    sessionsLength: data?.sessions?.length || 0,
+    modelsLength: data?.models?.length || 0
+  });
 
   const stats: UsageStats = {
     todayUsage: data?.daily || null,
@@ -98,6 +114,14 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
     isLoading,
     error: error?.message || data?.error,
   };
+
+  console.log(`[DEBUG] useUsageStats: Processed stats:`, {
+    hasTodayUsage: !!stats.todayUsage,
+    hasTotalUsage: !!stats.totalUsage,
+    recentSessionsCount: stats.recentSessions.length,
+    topModelsCount: stats.topModels.length,
+    error: stats.error
+  });
 
   return {
     ...stats,

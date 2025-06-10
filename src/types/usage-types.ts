@@ -2,19 +2,27 @@ export interface DailyUsageData {
   date: string;
   inputTokens: number;
   outputTokens: number;
+  cacheCreationTokens?: number;
+  cacheReadTokens?: number;
   totalTokens: number;
-  cost: number;
+  totalCost?: number;
+  cost: number; // For compatibility, derived from totalCost
 }
 
 export interface SessionData {
   sessionId: string;
-  startTime: string;
-  endTime?: string;
+  projectPath: string;
+  lastActivity: string;
   inputTokens: number;
   outputTokens: number;
+  cacheCreationTokens?: number;
+  cacheReadTokens?: number;
   totalTokens: number;
-  cost: number;
-  model: string;
+  totalCost: number;
+  cost: number; // Alias for totalCost for compatibility
+  model?: string; // Optional since ccusage doesn't provide this
+  startTime?: string; // Derived from lastActivity for compatibility
+  endTime?: string;
   projectName?: string;
 }
 
@@ -47,12 +55,22 @@ export interface CCUsageCommandResult {
 }
 
 export interface CCUsageOutput {
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-  cost: number;
-  date?: string;
+  daily?: DailyUsageData[];
   sessions?: SessionData[];
+  totals?: {
+    inputTokens: number;
+    outputTokens: number;
+    cacheCreationTokens?: number;
+    cacheReadTokens?: number;
+    totalTokens: number;
+    totalCost: number;
+  };
+  // Legacy fields for compatibility
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  cost?: number;
+  date?: string;
 }
 
 export interface UsageStats {
