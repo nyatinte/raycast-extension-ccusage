@@ -1,14 +1,18 @@
 import { List, Icon, ActionPanel, Action, Color, ReactNode } from "@raycast/api";
 import { SessionData } from "../types/usage-types";
-import { DataFormatter } from "../utils/data-formatter";
-import { UsageCalculator } from "../utils/usage-calculator";
+import { formatTokens, formatCost, formatRelativeTime, formatModelName } from "../utils/data-formatter";
+import {
+  calculateAverageSessionCost,
+  calculateAverageSessionTokens,
+  calculateEfficiencyMetrics,
+} from "../utils/usage-calculator";
 
-interface SessionUsageProps {
+type SessionUsageProps = {
   sessions: SessionData[];
   isLoading: boolean;
   error?: string;
   settingsActions?: ReactNode;
-}
+};
 
 export default function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
   const getSessionIcon = (session: SessionData) => {
@@ -46,9 +50,9 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
       );
     }
 
-    const averageCost = UsageCalculator.calculateAverageSessionCost(sessions);
-    const averageTokens = UsageCalculator.calculateAverageSessionTokens(sessions);
-    const efficiency = UsageCalculator.calculateEfficiencyMetrics(sessions);
+    const averageCost = calculateAverageSessionCost(sessions);
+    const averageTokens = calculateAverageSessionTokens(sessions);
+    const efficiency = calculateEfficiencyMetrics(sessions);
 
     return (
       <List.Item.Detail.Metadata>
@@ -60,14 +64,8 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Session Statistics" />
-        <List.Item.Detail.Metadata.Label
-          title="Average Cost per Session"
-          text={DataFormatter.formatCost(averageCost)}
-        />
-        <List.Item.Detail.Metadata.Label
-          title="Average Tokens per Session"
-          text={DataFormatter.formatTokens(averageTokens)}
-        />
+        <List.Item.Detail.Metadata.Label title="Average Cost per Session" text={formatCost(averageCost)} />
+        <List.Item.Detail.Metadata.Label title="Average Tokens per Session" text={formatTokens(averageTokens)} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
@@ -82,7 +80,7 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
         {efficiency.mostEfficientModel && (
           <List.Item.Detail.Metadata.Label
             title="Most Efficient Model"
-            text={DataFormatter.formatModelName(efficiency.mostEfficientModel)}
+            text={formatModelName(efficiency.mostEfficientModel)}
           />
         )}
         <List.Item.Detail.Metadata.Separator />
@@ -92,7 +90,7 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
           <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
             title={`Session ${index + 1}`}
-            text={`${DataFormatter.formatModelName(session.model)} • ${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime || session.lastActivity)}`}
+            text={`${formatModelName(session.model)} • ${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTime(session.startTime || session.lastActivity)}`}
             icon={{ source: getSessionIcon(session), tintColor: getSessionIconColor(session) }}
           />
         ))}

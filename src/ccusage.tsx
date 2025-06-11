@@ -8,9 +8,9 @@ import SessionUsage from "./components/SessionUsage";
 import CostAnalysis from "./components/CostAnalysis";
 import ModelBreakdown from "./components/ModelBreakdown";
 
-interface Preferences {
+type Preferences = {
   defaultView: string;
-}
+};
 
 export default function ccusage() {
   const preferences = getPreferenceValues<Preferences>();
@@ -26,10 +26,7 @@ export default function ccusage() {
   const checkInitialization = async () => {
     setIsLoading(true);
     try {
-      const [initResult, configResult] = await Promise.all([
-        isInitialized(),
-        hasValidRuntimeConfig()
-      ]);
+      const [initResult, configResult] = await Promise.all([isInitialized(), hasValidRuntimeConfig()]);
       setInitialized(initResult);
       setHasValidConfig(configResult);
     } catch (error) {
@@ -52,10 +49,14 @@ export default function ccusage() {
 
   // Runtime configuration is mandatory - show setup if not configured
   if (!initialized || !hasValidConfig || showSettings) {
-    return <RuntimeSetup onComplete={() => {
-      setShowSettings(false);
-      checkInitialization();
-    }} />;
+    return (
+      <RuntimeSetup
+        onComplete={() => {
+          setShowSettings(false);
+          checkInitialization();
+        }}
+      />
+    );
   }
 
   // After runtime is configured, check ccusage availability
@@ -72,12 +73,8 @@ export default function ccusage() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Install ccusage" url="https://github.com/ryoppippi/ccusage" />
-              <Action
-                title="Reconfigure Runtime"
-                icon={Icon.Gear}
-                onAction={() => setShowSettings(true)}
-              />
+              <Action.OpenInBrowser title="Install Ccusage" url="https://github.com/ryoppippi/ccusage" />
+              <Action title="Reconfigure Runtime" icon={Icon.Gear} onAction={() => setShowSettings(true)} />
             </ActionPanel>
           }
         />
@@ -108,20 +105,16 @@ export default function ccusage() {
   );
 
   return (
-    <List 
-      isLoading={stats.isLoading} 
-      selectedItemId={selectedItemId} 
-      isShowingDetail
-    >
-      <DailyUsage 
-        dailyUsage={stats.todayUsage} 
-        isLoading={stats.isLoading} 
+    <List isLoading={stats.isLoading} selectedItemId={selectedItemId} isShowingDetail>
+      <DailyUsage
+        dailyUsage={stats.todayUsage}
+        isLoading={stats.isLoading}
         error={stats.error}
         settingsActions={settingsActions}
       />
-      <SessionUsage 
-        sessions={stats.recentSessions} 
-        isLoading={stats.isLoading} 
+      <SessionUsage
+        sessions={stats.recentSessions}
+        isLoading={stats.isLoading}
         error={stats.error}
         settingsActions={settingsActions}
       />
@@ -133,9 +126,9 @@ export default function ccusage() {
         error={stats.error}
         settingsActions={settingsActions}
       />
-      <ModelBreakdown 
-        models={stats.topModels} 
-        isLoading={stats.isLoading} 
+      <ModelBreakdown
+        models={stats.topModels}
+        isLoading={stats.isLoading}
         error={stats.error}
         settingsActions={settingsActions}
       />

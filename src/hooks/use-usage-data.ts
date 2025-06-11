@@ -2,7 +2,7 @@ import { useExec } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 import { cpus } from "os";
 import { UsageData, UsageStats, CCUsageOutput, DailyUsageData, SessionData } from "../types/usage-types";
-import { UsageCalculator } from "../utils/usage-calculator";
+import { getRecentSessions } from "../utils/usage-calculator";
 
 function getEnhancedNodePaths(): string {
   const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
@@ -197,7 +197,7 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
   const stats: UsageStats = {
     todayUsage: dailyUsage.data,
     totalUsage: totalUsage.data,
-    recentSessions: sessionUsage.data ? UsageCalculator.getRecentSessions(sessionUsage.data, 5) : [],
+    recentSessions: sessionUsage.data ? getRecentSessions(sessionUsage.data, 5) : [],
     topModels: [], // TODO: Calculate from sessions
     isLoading: totalUsage.isLoading || dailyUsage.isLoading || sessionUsage.isLoading,
     error: totalUsage.error?.message || dailyUsage.error?.message || sessionUsage.error?.message,

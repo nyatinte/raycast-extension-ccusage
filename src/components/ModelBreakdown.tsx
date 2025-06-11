@@ -1,15 +1,15 @@
 import React, { ReactNode } from "react";
 import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
-import { DataFormatter } from "../utils/data-formatter";
-import { UsageCalculator } from "../utils/usage-calculator";
+import { formatTokens, formatCost, formatModelName, getCostPerMTok } from "../utils/data-formatter";
+import { getTopModels } from "../utils/usage-calculator";
 
-interface ModelBreakdownProps {
+type ModelBreakdownProps = {
   models: ModelUsage[];
   isLoading: boolean;
   error?: string;
   settingsActions?: ReactNode;
-}
+};
 
 export default function ModelBreakdown({ models, isLoading, error, settingsActions }: ModelBreakdownProps) {
   const getModelIcon = (model: string) => {
@@ -58,22 +58,19 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
       );
     }
 
-    const topModels = UsageCalculator.getTopModels(models, 10);
-    const tokenBreakdown = UsageCalculator.calculateTokenBreakdown(models);
-    const costBreakdown = UsageCalculator.calculateCostBreakdown(models);
-    const efficiency = UsageCalculator.calculateEfficiencyMetrics(
-      models.flatMap((model) =>
-        Array(model.sessionCount).fill({
-          sessionId: `${model.model}-session`,
-          startTime: new Date().toISOString(),
-          inputTokens: Math.floor(model.inputTokens / model.sessionCount),
-          outputTokens: Math.floor(model.outputTokens / model.sessionCount),
-          totalTokens: Math.floor(model.totalTokens / model.sessionCount),
-          cost: model.cost / model.sessionCount,
-          model: model.model,
-        }),
-      ),
-    );
+    const topModels = getTopModels(models, 10);
+
+    // Calculate totals inline
+    const totalTokens = models.reduce((sum, model) => sum + model.totalTokens, 0);
+    const totalCost = models.reduce((sum, model) => sum + model.cost, 0);
+    const totalSessions = models.reduce((sum, model) => sum + model.sessionCount, 0);
+
+    // Find most efficient model (lowest cost per token)
+    const mostEfficientModel = models.reduce((best, current) => {
+      const currentEfficiency = current.totalTokens > 0 ? current.cost / current.totalTokens : Infinity;
+      const bestEfficiency = best && best.totalTokens > 0 ? best.cost / best.totalTokens : Infinity;
+      return currentEfficiency < bestEfficiency ? current : best;
+    }, models[0] || null);
 
     // Group models by tier
     const modelsByTier = models.reduce(
@@ -96,31 +93,25 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Usage Distribution" />
-        <List.Item.Detail.Metadata.Label
-          title="Total Tokens"
-          text={DataFormatter.formatTokens(tokenBreakdown.totalTokens)}
-        />
-        <List.Item.Detail.Metadata.Label title="Total Cost" text={DataFormatter.formatCost(costBreakdown.totalCost)} />
-        <List.Item.Detail.Metadata.Label
-          title="Total Sessions"
-          text={models.reduce((sum, m) => sum + m.sessionCount, 0).toString()}
-        />
+        <List.Item.Detail.Metadata.Label title="Total Tokens" text={formatTokens(totalTokens)} />
+        <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(totalCost)} />
+        <List.Item.Detail.Metadata.Label title="Total Sessions" text={totalSessions.toString()} />
         <List.Item.Detail.Metadata.Separator />
 
-        {efficiency.mostEfficientModel && (
+        {mostEfficientModel && (
           <>
             <List.Item.Detail.Metadata.Label title="Efficiency Analysis" />
             <List.Item.Detail.Metadata.Label
               title="Most Efficient Model"
-              text={DataFormatter.formatModelName(efficiency.mostEfficientModel)}
+              text={formatModelName(mostEfficientModel.model)}
               icon={{
-                source: getModelIcon(efficiency.mostEfficientModel),
-                tintColor: getModelIconColor(efficiency.mostEfficientModel),
+                source: getModelIcon(mostEfficientModel.model),
+                tintColor: getModelIconColor(mostEfficientModel.model),
               }}
             />
             <List.Item.Detail.Metadata.Label
-              title="Average Cost per Output"
-              text={`$${efficiency.averageCostPerOutput.toFixed(6)}`}
+              title="Cost per MTok"
+              text={getCostPerMTok(mostEfficientModel.cost, mostEfficientModel.totalTokens)}
             />
             <List.Item.Detail.Metadata.Separator />
           </>
@@ -133,15 +124,13 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
                 <List.Item.Detail.Metadata.Label title={`${tier} Models`} />
                 {tierModels.slice(0, 3).map((model, index) => {
                   const percentage =
-                    tokenBreakdown.totalTokens > 0
-                      ? DataFormatter.formatPercentage(model.totalTokens, tokenBreakdown.totalTokens)
-                      : "0%";
+                    totalTokens > 0 ? `${((model.totalTokens / totalTokens) * 100).toFixed(1)}%` : "0%";
 
                   return (
                     <List.Item.Detail.Metadata.Label
                       key={`${tier}-${model.model || "unknown"}-${index}`}
-                      title={DataFormatter.formatModelName(model.model)}
-                      text={`${DataFormatter.formatTokens(model.totalTokens)} (${percentage}) • ${DataFormatter.formatCost(model.cost)} • ${model.sessionCount} sessions`}
+                      title={formatModelName(model.model)}
+                      text={`${formatTokens(model.totalTokens)} (${percentage}) • ${formatCost(model.cost)} • ${model.sessionCount} sessions`}
                       icon={{ source: getModelIcon(model.model), tintColor: getModelIconColor(model.model) }}
                     />
                   );
@@ -153,13 +142,13 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
 
         <List.Item.Detail.Metadata.Label title="Top Models by Usage" />
         {topModels.slice(0, 5).map((model, index) => {
-          const costPerMTok = DataFormatter.getCostPerMTok(model.cost, model.totalTokens);
+          const costPerMTok = getCostPerMTok(model.cost, model.totalTokens);
 
           return (
             <List.Item.Detail.Metadata.Label
               key={`top-${model.model || "unknown"}-${index}`}
-              title={`${index + 1}. ${DataFormatter.formatModelName(model.model)}`}
-              text={`${DataFormatter.formatTokens(model.totalTokens)} • ${DataFormatter.formatCost(model.cost)} • ${costPerMTok}`}
+              title={`${index + 1}. ${formatModelName(model.model)}`}
+              text={`${formatTokens(model.totalTokens)} • ${formatCost(model.cost)} • ${costPerMTok}`}
               icon={{ source: getModelIcon(model.model), tintColor: getModelIconColor(model.model) }}
             />
           );

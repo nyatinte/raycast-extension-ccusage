@@ -1,18 +1,24 @@
 import { List, Icon, ActionPanel, Action, Color, ReactNode } from "@raycast/api";
 import { DailyUsageData, ModelUsage } from "../types/usage-types";
-import { DataFormatter } from "../utils/data-formatter";
-import { UsageCalculator } from "../utils/usage-calculator";
+import { formatTokens, formatCost, getCostPerMTok, formatModelName } from "../utils/data-formatter";
 
-interface CostAnalysisProps {
+type CostAnalysisProps = {
   totalUsage: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null;
   dailyUsage: DailyUsageData | null;
   models: ModelUsage[];
   isLoading: boolean;
   error?: string;
   settingsActions?: ReactNode;
-}
+};
 
-export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error, settingsActions }: CostAnalysisProps) {
+export default function CostAnalysis({
+  totalUsage,
+  dailyUsage,
+  models,
+  isLoading,
+  error,
+  settingsActions,
+}: CostAnalysisProps) {
   const getCostIcon = (cost: number) => {
     if (cost === 0) return Icon.Circle;
     if (cost < 1) return Icon.Coins;
@@ -48,12 +54,31 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
       );
     }
 
-    const costBreakdown = UsageCalculator.calculateCostBreakdown(models);
-    const tokenBreakdown = UsageCalculator.calculateTokenBreakdown(models);
+    // Calculate cost breakdown inline
+    const totalModelCost = models.reduce((sum, model) => sum + model.cost, 0);
+    const costBreakdown = {
+      totalCost: totalModelCost,
+      breakdown: models.map((model) => ({
+        model: model.model,
+        cost: model.cost,
+        percentage: totalModelCost > 0 ? `${((model.cost / totalModelCost) * 100).toFixed(1)}%` : "0%",
+      })),
+    };
+
+    // Calculate token breakdown inline
+    const totalModelTokens = models.reduce((sum, model) => sum + model.totalTokens, 0);
+    const tokenBreakdown = {
+      totalTokens: totalModelTokens,
+      breakdown: models.map((model) => ({
+        model: model.model,
+        tokens: model.totalTokens,
+        percentage: totalModelTokens > 0 ? `${((model.totalTokens / totalModelTokens) * 100).toFixed(1)}%` : "0%",
+      })),
+    };
 
     // Calculate daily vs total comparison
     const dailyCostPercentage =
-      dailyUsage && totalUsage.cost > 0 ? DataFormatter.formatPercentage(dailyUsage.cost, totalUsage.cost) : "0%";
+      dailyUsage && totalUsage.cost > 0 ? `${((dailyUsage.cost / totalUsage.cost) * 100).toFixed(1)}%` : "0%";
 
     // Estimate monthly cost based on daily average
     const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
@@ -63,42 +88,38 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
 
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label
-          title="Cost Overview"
-          text={DataFormatter.formatCost(totalUsage.cost)}
-          icon={Icon.Coins}
-        />
+        <List.Item.Detail.Metadata.Label title="Cost Overview" text={formatCost(totalUsage.cost)} icon={Icon.Coins} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Daily vs Total" />
         <List.Item.Detail.Metadata.Label
           title="Today's Cost"
-          text={dailyUsage ? DataFormatter.formatCost(dailyUsage.cost) : "$0.00"}
+          text={dailyUsage ? formatCost(dailyUsage.cost) : "$0.00"}
         />
         <List.Item.Detail.Metadata.Label title="Today's % of Total" text={dailyCostPercentage} />
-        <List.Item.Detail.Metadata.Label title="Total Cost" text={DataFormatter.formatCost(totalUsage.cost)} />
+        <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(totalUsage.cost)} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost Efficiency" />
         <List.Item.Detail.Metadata.Label
           title="Cost per MTok"
-          text={DataFormatter.getCostPerMTok(totalUsage.cost, totalUsage.totalTokens)}
+          text={getCostPerMTok(totalUsage.cost, totalUsage.totalTokens)}
         />
         <List.Item.Detail.Metadata.Label
           title="Cost per Input MTok"
-          text={DataFormatter.getCostPerMTok(totalUsage.cost, totalUsage.inputTokens)}
+          text={getCostPerMTok(totalUsage.cost, totalUsage.inputTokens)}
         />
         <List.Item.Detail.Metadata.Label
           title="Cost per Output MTok"
-          text={DataFormatter.getCostPerMTok(totalUsage.cost, totalUsage.outputTokens)}
+          text={getCostPerMTok(totalUsage.cost, totalUsage.outputTokens)}
         />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Projections" />
-        <List.Item.Detail.Metadata.Label title="Daily Average" text={DataFormatter.formatCost(dailyAverage)} />
+        <List.Item.Detail.Metadata.Label title="Daily Average" text={formatCost(dailyAverage)} />
         <List.Item.Detail.Metadata.Label
           title="Projected Monthly"
-          text={DataFormatter.formatCost(projectedMonthlyCost)}
+          text={formatCost(projectedMonthlyCost)}
           icon={projectedMonthlyCost > 100 ? { source: Icon.ExclamationMark, tintColor: Color.Red } : undefined}
         />
         <List.Item.Detail.Metadata.Separator />
@@ -107,8 +128,8 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
         {costBreakdown.breakdown.slice(0, 5).map((model, index) => (
           <List.Item.Detail.Metadata.Label
             key={`cost-${model.model || "unknown"}-${index}`}
-            title={DataFormatter.formatModelName(model.model)}
-            text={`${DataFormatter.formatCost(model.cost)} (${model.percentage})`}
+            title={formatModelName(model.model)}
+            text={`${formatCost(model.cost)} (${model.percentage})`}
             icon={
               (model.model || "").includes("opus")
                 ? Icon.Crown
@@ -128,8 +149,8 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
             {tokenBreakdown.breakdown.slice(0, 3).map((model, index) => (
               <List.Item.Detail.Metadata.Label
                 key={`token-${model.model || "unknown"}-${index}`}
-                title={DataFormatter.formatModelName(model.model)}
-                text={`${DataFormatter.formatTokens(model.tokens)} (${model.percentage})`}
+                title={formatModelName(model.model)}
+                text={`${formatTokens(model.tokens)} (${model.percentage})`}
                 icon={Icon.Text}
               />
             ))}
@@ -150,7 +171,7 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
       return [{ text: "No cost data", icon: Icon.Circle }];
     }
 
-    return [{ text: DataFormatter.formatCost(totalUsage.cost), icon: Icon.Coins }];
+    return [{ text: formatCost(totalUsage.cost), icon: Icon.Coins }];
   };
 
   return (

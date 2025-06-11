@@ -1,21 +1,21 @@
 import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { DailyUsageData } from "../types/usage-types";
-import { DataFormatter } from "../utils/data-formatter";
-import { UsageCalculator } from "../utils/usage-calculator";
+import { formatTokens, formatCost, formatDate, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
+import { getUsageIntensity } from "../utils/usage-calculator";
 import { ReactNode } from "react";
 
-interface DailyUsageProps {
+type DailyUsageProps = {
   dailyUsage: DailyUsageData | null;
   isLoading: boolean;
   error?: string;
   settingsActions?: ReactNode;
-}
+};
 
 export default function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
   const getTrendIcon = (usage: DailyUsageData | null) => {
     if (!usage) return Icon.Calendar;
 
-    const intensity = UsageCalculator.getUsageIntensity(usage.totalTokens);
+    const intensity = getUsageIntensity(usage.totalTokens);
     switch (intensity) {
       case "Low":
         return Icon.Circle;
@@ -33,7 +33,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
   const getTrendColor = (usage: DailyUsageData | null) => {
     if (!usage) return Color.SecondaryText;
 
-    const intensity = UsageCalculator.getUsageIntensity(usage.totalTokens);
+    const intensity = getUsageIntensity(usage.totalTokens);
     switch (intensity) {
       case "Low":
         return Color.Green;
@@ -67,40 +67,23 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
       );
     }
 
-    const efficiency = DataFormatter.getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens);
-    const costPerMTok = DataFormatter.getCostPerMTok(dailyUsage.cost, dailyUsage.totalTokens);
-    const intensity = UsageCalculator.getUsageIntensity(dailyUsage.totalTokens);
+    const efficiency = getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens);
+    const costPerMTok = getCostPerMTok(dailyUsage.cost, dailyUsage.totalTokens);
+    const intensity = getUsageIntensity(dailyUsage.totalTokens);
 
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label
-          title="Date"
-          text={DataFormatter.formatDate(dailyUsage.date)}
-          icon={Icon.Calendar}
-        />
+        <List.Item.Detail.Metadata.Label title="Date" text={formatDate(dailyUsage.date)} icon={Icon.Calendar} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />
-        <List.Item.Detail.Metadata.Label
-          title="Input Tokens"
-          text={DataFormatter.formatTokens(dailyUsage.inputTokens)}
-        />
-        <List.Item.Detail.Metadata.Label
-          title="Output Tokens"
-          text={DataFormatter.formatTokens(dailyUsage.outputTokens)}
-        />
-        <List.Item.Detail.Metadata.Label
-          title="Total Tokens"
-          text={DataFormatter.formatTokens(dailyUsage.totalTokens)}
-        />
+        <List.Item.Detail.Metadata.Label title="Input Tokens" text={formatTokens(dailyUsage.inputTokens)} />
+        <List.Item.Detail.Metadata.Label title="Output Tokens" text={formatTokens(dailyUsage.outputTokens)} />
+        <List.Item.Detail.Metadata.Label title="Total Tokens" text={formatTokens(dailyUsage.totalTokens)} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Cost Analysis" />
-        <List.Item.Detail.Metadata.Label
-          title="Total Cost"
-          text={DataFormatter.formatCost(dailyUsage.cost)}
-          icon={Icon.Coins}
-        />
+        <List.Item.Detail.Metadata.Label title="Total Cost" text={formatCost(dailyUsage.cost)} icon={Icon.Coins} />
         <List.Item.Detail.Metadata.Label title="Cost per MTok" text={costPerMTok} />
         <List.Item.Detail.Metadata.Separator />
 
@@ -124,13 +107,13 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
       return [{ text: "No usage today", icon: Icon.Calendar }];
     }
 
-    return [{ text: DataFormatter.formatCost(dailyUsage.cost), icon: Icon.Coins }];
+    return [{ text: formatCost(dailyUsage.cost), icon: Icon.Coins }];
   };
 
   return (
     <List.Item
       id="daily"
-      title={dailyUsage ? `Today (${DataFormatter.formatDate(dailyUsage.date)})` : "Today"}
+      title={dailyUsage ? `Today (${formatDate(dailyUsage.date)})` : "Today"}
       icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
       accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}

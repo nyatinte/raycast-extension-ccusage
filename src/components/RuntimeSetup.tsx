@@ -3,14 +3,14 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { saveRuntimeSettings, markAsInitialized } from "../utils/runtime-settings";
 import { RuntimeConfig } from "../types/runtime-types";
 
-interface Props {
+type Props = {
   onComplete: () => void;
-}
+};
 
-interface FormValues {
+type FormValues = {
   runtimeType: RuntimeConfig["type"];
   customPath?: string;
-}
+};
 
 export default function RuntimeSetup({ onComplete }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);

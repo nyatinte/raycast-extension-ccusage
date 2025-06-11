@@ -2,8 +2,8 @@ import { MenuBarExtra, Icon, Color, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
 import { isInitialized, hasValidRuntimeConfig } from "./utils/runtime-settings";
-import { DataFormatter } from "./utils/data-formatter";
-import { UsageCalculator } from "./utils/usage-calculator";
+import { formatTokens, formatCost, formatRelativeTime, formatModelName } from "./utils/data-formatter";
+import { getUsageIntensity } from "./utils/usage-calculator";
 
 export default function MenuBarccusage() {
   const [initialized, setInitialized] = useState(false);
@@ -17,10 +17,7 @@ export default function MenuBarccusage() {
   useEffect(() => {
     const checkInit = async () => {
       try {
-        const [initResult, configResult] = await Promise.all([
-          isInitialized(),
-          hasValidRuntimeConfig()
-        ]);
+        const [initResult, configResult] = await Promise.all([isInitialized(), hasValidRuntimeConfig()]);
         setInitialized(initResult);
         setHasValidConfig(configResult);
       } catch (error) {
@@ -85,7 +82,7 @@ export default function MenuBarccusage() {
       return { source: Icon.Circle, tintColor: Color.SecondaryText };
     }
 
-    const intensity = UsageCalculator.getUsageIntensity(stats.todayUsage.totalTokens);
+    const intensity = getUsageIntensity(stats.todayUsage.totalTokens);
     switch (intensity) {
       case "Low":
         return { source: Icon.Circle, tintColor: Color.Green };
@@ -105,7 +102,7 @@ export default function MenuBarccusage() {
       return "No Claude usage today";
     }
 
-    return `Today: ${DataFormatter.formatTokens(stats.todayUsage.totalTokens)} tokens, ${DataFormatter.formatCost(stats.todayUsage.cost)}`;
+    return `Today: ${formatTokens(stats.todayUsage.totalTokens)} tokens, ${formatCost(stats.todayUsage.cost)}`;
   };
 
   return (
@@ -115,27 +112,23 @@ export default function MenuBarccusage() {
           <>
             <MenuBarExtra.Item
               title="Total Tokens"
-              subtitle={DataFormatter.formatTokens(stats.todayUsage.totalTokens)}
+              subtitle={formatTokens(stats.todayUsage.totalTokens)}
               icon={Icon.Text}
             />
             <MenuBarExtra.Item
               title="Input Tokens"
-              subtitle={DataFormatter.formatTokens(stats.todayUsage.inputTokens)}
+              subtitle={formatTokens(stats.todayUsage.inputTokens)}
               icon={Icon.ArrowDown}
             />
             <MenuBarExtra.Item
               title="Output Tokens"
-              subtitle={DataFormatter.formatTokens(stats.todayUsage.outputTokens)}
+              subtitle={formatTokens(stats.todayUsage.outputTokens)}
               icon={Icon.ArrowUp}
             />
-            <MenuBarExtra.Item
-              title="Cost"
-              subtitle={DataFormatter.formatCost(stats.todayUsage.cost)}
-              icon={Icon.Coins}
-            />
+            <MenuBarExtra.Item title="Cost" subtitle={formatCost(stats.todayUsage.cost)} icon={Icon.Coins} />
             <MenuBarExtra.Item
               title="Usage Intensity"
-              subtitle={UsageCalculator.getUsageIntensity(stats.todayUsage.totalTokens)}
+              subtitle={getUsageIntensity(stats.todayUsage.totalTokens)}
               icon={getMenuBarIcon()}
             />
           </>
@@ -153,14 +146,10 @@ export default function MenuBarccusage() {
           <>
             <MenuBarExtra.Item
               title="All-time Tokens"
-              subtitle={DataFormatter.formatTokens(stats.totalUsage.totalTokens)}
+              subtitle={formatTokens(stats.totalUsage.totalTokens)}
               icon={Icon.Text}
             />
-            <MenuBarExtra.Item
-              title="All-time Cost"
-              subtitle={DataFormatter.formatCost(stats.totalUsage.cost)}
-              icon={Icon.Coins}
-            />
+            <MenuBarExtra.Item title="All-time Cost" subtitle={formatCost(stats.totalUsage.cost)} icon={Icon.Coins} />
           </>
         ) : (
           <MenuBarExtra.Item title="No total usage data" icon={Icon.Circle} />
@@ -178,8 +167,8 @@ export default function MenuBarccusage() {
             {stats.recentSessions.slice(0, 3).map((session, index) => (
               <MenuBarExtra.Item
                 key={session.sessionId || `${session.model}-${index}`}
-                title={DataFormatter.formatModelName(session.model)}
-                subtitle={`${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime || session.lastActivity)}`}
+                title={formatModelName(session.model)}
+                subtitle={`${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTime(session.startTime || session.lastActivity)}`}
                 icon={
                   (session.model || "").includes("opus")
                     ? Icon.Crown
@@ -204,8 +193,8 @@ export default function MenuBarccusage() {
             .map((model, index) => (
               <MenuBarExtra.Item
                 key={`top-model-${model.model || "unknown"}-${index}`}
-                title={DataFormatter.formatModelName(model.model)}
-                subtitle={`${DataFormatter.formatTokens(model.totalTokens)} • ${DataFormatter.formatCost(model.cost)}`}
+                title={formatModelName(model.model)}
+                subtitle={`${formatTokens(model.totalTokens)} • ${formatCost(model.cost)}`}
                 icon={
                   (model.model || "").includes("opus")
                     ? Icon.Crown
