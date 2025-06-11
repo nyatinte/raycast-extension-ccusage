@@ -2,14 +2,16 @@ import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { DailyUsageData } from "../types/usage-types";
 import { DataFormatter } from "../utils/data-formatter";
 import { UsageCalculator } from "../utils/usage-calculator";
+import { ReactNode } from "react";
 
 interface DailyUsageProps {
   dailyUsage: DailyUsageData | null;
   isLoading: boolean;
   error?: string;
+  settingsActions?: ReactNode;
 }
 
-export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageProps) {
+export default function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
   const getTrendIcon = (usage: DailyUsageData | null) => {
     if (!usage) return Icon.Calendar;
 
@@ -134,6 +136,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {settingsActions}
           <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
           <Action.OpenInBrowser
             title="View Ccusage Repository"
