@@ -20,6 +20,30 @@
       "mode": "menu-bar"
     }
   ],
+  "preferences": [
+    {
+      "name": "runtimeType",
+      "type": "dropdown",
+      "required": false,
+      "title": "JavaScript Runtime",
+      "description": "Choose the runtime to execute ccusage commands",
+      "default": "npx",
+      "data": [
+        {"title": "npx (Node Package Execute)", "value": "npx"},
+        {"title": "bunx (Bun Package Execute)", "value": "bunx"},
+        {"title": "pnpm dlx (PNPM Package Execute)", "value": "pnpm"},
+        {"title": "deno run (Deno Runtime)", "value": "deno"}
+      ]
+    },
+    {
+      "name": "customRuntimePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Runtime Path",
+      "description": "Override the default runtime path (optional)",
+      "placeholder": "e.g., /usr/local/bin/npx"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0",
