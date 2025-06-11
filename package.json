@@ -24,7 +24,10 @@
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0",
     "ccusage": "^0.6.2",
-    "usehooks-ts": "^3.1.0"
+    "date-fns": "^4.1.0",
+    "ts-pattern": "^5.7.1",
+    "usehooks-ts": "^3.1.0",
+    "zod": "^3.25.61"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
