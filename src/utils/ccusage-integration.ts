@@ -5,7 +5,6 @@ import { buildCCUsageCommand, getRuntimeType } from "./preferences";
 
 const execAsync = promisify(exec);
 
-
 async function executeCommand(args: string): Promise<CCUsageCommandResult> {
   try {
     const command = buildCCUsageCommand(args);
@@ -21,9 +20,7 @@ async function executeCommand(args: string): Promise<CCUsageCommandResult> {
 
     if (execError.code === "ENOENT") {
       const runtimeType = getRuntimeType();
-      throw new Error(
-        `Runtime '${runtimeType}' not found. Please configure your runtime in Preferences (⌘,).`,
-      );
+      throw new Error(`Runtime '${runtimeType}' not found. Please configure your runtime in Preferences (⌘,).`);
     } else if (execError.code === "EACCES") {
       throw new Error(`Permission denied: Cannot execute the configured runtime. Please check file permissions.`);
     } else if (execError.code === "ETIMEDOUT") {

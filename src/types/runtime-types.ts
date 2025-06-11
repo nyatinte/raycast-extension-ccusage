@@ -15,7 +15,7 @@ export type RuntimeConfig = {
 };
 
 /**
- * @deprecated Use preferences.ts instead - this is kept for backward compatibility  
+ * @deprecated Use preferences.ts instead - this is kept for backward compatibility
  */
 export type RuntimeSettings = {
   selectedRuntime?: RuntimeType;

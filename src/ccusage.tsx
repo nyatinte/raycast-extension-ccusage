@@ -31,9 +31,9 @@ export default function ccusage() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Install Ccusage" url="https://github.com/ryoppippi/ccusage" />
-              <Action 
-                title="Configure Runtime in Preferences" 
-                icon={Icon.Gear} 
+              <Action
+                title="Configure Runtime in Preferences"
+                icon={Icon.Gear}
                 onAction={openExtensionPreferences}
                 shortcut={{ modifiers: ["cmd"], key: "," }}
               />
