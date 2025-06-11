@@ -1,14 +1,24 @@
 import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
-import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
-import { formatTokens, formatCost, formatRelativeTime, formatModelName } from "./utils/data-formatter";
-import { getUsageIntensity } from "./utils/usage-calculator";
+import { 
+  useccusageAvailability, 
+  useDailyUsage, 
+  useMonthlyUsage, 
+  useTotalUsage 
+} from "./hooks/use-usage-data";
+import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
 
 export default function MenuBarccusage() {
-  // All hooks must be called at the top level
+  // Check ccusage availability
   const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
-  const stats = useUsageStats(1000); // 1 second refresh for menu bar
+  
+  // Get usage data (only when menu bar is displayed)
+  const { data: dailyUsage, isLoading: dailyLoading } = useDailyUsage(0); // No refresh interval
+  const { data: monthlyUsage, isLoading: monthlyLoading } = useMonthlyUsage();
+  const { data: totalUsage, isLoading: totalLoading } = useTotalUsage(0); // No refresh interval
 
-  if (availabilityLoading || stats.isLoading) {
+  const isLoading = availabilityLoading || dailyLoading || monthlyLoading || totalLoading;
+
+  if (isLoading) {
     return (
       <MenuBarExtra
         icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
@@ -37,150 +47,72 @@ export default function MenuBarccusage() {
     );
   }
 
-  if (stats.error) {
-    return (
-      <MenuBarExtra icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} tooltip="Error loading usage data">
-        <MenuBarExtra.Item title="Error" subtitle={stats.error} icon={Icon.ExclamationMark} />
-      </MenuBarExtra>
-    );
-  }
-
+  // Calculate menu bar icon based on daily usage
   const getMenuBarIcon = () => {
-    if (!stats.todayUsage) {
-      return { source: Icon.Circle, tintColor: Color.SecondaryText };
+    if (!dailyUsage) {
+      return { source: Icon.Coins, tintColor: Color.SecondaryText };
     }
 
-    const intensity = getUsageIntensity(stats.todayUsage.totalTokens);
-    switch (intensity) {
-      case "Low":
-        return { source: Icon.Circle, tintColor: Color.Green };
-      case "Medium":
-        return { source: Icon.CircleProgress25, tintColor: Color.Yellow };
-      case "High":
-        return { source: Icon.CircleProgress75, tintColor: Color.Orange };
-      case "Very High":
-        return { source: Icon.CircleProgress100, tintColor: Color.Red };
-      default:
-        return { source: Icon.Circle, tintColor: Color.SecondaryText };
-    }
+    // Use cost-based intensity
+    const cost = dailyUsage.cost || 0;
+    if (cost < 1) return { source: Icon.Coins, tintColor: Color.Green };
+    if (cost < 5) return { source: Icon.Coins, tintColor: Color.Yellow };
+    if (cost < 10) return { source: Icon.Coins, tintColor: Color.Orange };
+    return { source: Icon.Coins, tintColor: Color.Red };
   };
 
   const getTooltip = () => {
-    if (!stats.todayUsage) {
+    if (!dailyUsage) {
       return "No Claude usage today";
     }
-
-    return `Today: ${formatTokens(stats.todayUsage.totalTokens)} tokens, ${formatCost(stats.todayUsage.cost)}`;
+    return `Today: ${formatCost(dailyUsage.cost)} • ${formatTokensAsMTok(dailyUsage.totalTokens)}`;
   };
 
   return (
     <MenuBarExtra icon={getMenuBarIcon()} tooltip={getTooltip()}>
+      
       <MenuBarExtra.Section title="Today's Usage">
-        {stats.todayUsage ? (
-          <>
-            <MenuBarExtra.Item
-              title="Total Tokens"
-              subtitle={formatTokens(stats.todayUsage.totalTokens)}
-              icon={Icon.Text}
-            />
-            <MenuBarExtra.Item
-              title="Input Tokens"
-              subtitle={formatTokens(stats.todayUsage.inputTokens)}
-              icon={Icon.ArrowDown}
-            />
-            <MenuBarExtra.Item
-              title="Output Tokens"
-              subtitle={formatTokens(stats.todayUsage.outputTokens)}
-              icon={Icon.ArrowUp}
-            />
-            <MenuBarExtra.Item title="Cost" subtitle={formatCost(stats.todayUsage.cost)} icon={Icon.Coins} />
-            <MenuBarExtra.Item
-              title="Usage Intensity"
-              subtitle={getUsageIntensity(stats.todayUsage.totalTokens)}
-              icon={getMenuBarIcon()}
-            />
-          </>
-        ) : (
-          <MenuBarExtra.Item
-            title="No usage today"
-            subtitle="Start using Claude Code to see metrics"
-            icon={Icon.Circle}
-          />
-        )}
+        <MenuBarExtra.Item
+          title="Daily Cost"
+          subtitle={
+            dailyUsage 
+              ? `${formatCost(dailyUsage.cost)} • ${formatTokensAsMTok(dailyUsage.totalTokens)}`
+              : "No usage today"
+          }
+          icon={Icon.Calendar}
+        />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="Monthly Usage">
+        <MenuBarExtra.Item
+          title="Monthly Cost"
+          subtitle={
+            monthlyUsage 
+              ? `${formatCost(monthlyUsage.cost)} • ${formatTokensAsMTok(monthlyUsage.totalTokens)}`
+              : "No usage this month"
+          }
+          icon={Icon.BarChart}
+        />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Total Usage">
-        {stats.totalUsage ? (
-          <>
-            <MenuBarExtra.Item
-              title="All-time Tokens"
-              subtitle={formatTokens(stats.totalUsage.totalTokens)}
-              icon={Icon.Text}
-            />
-            <MenuBarExtra.Item title="All-time Cost" subtitle={formatCost(stats.totalUsage.cost)} icon={Icon.Coins} />
-          </>
-        ) : (
-          <MenuBarExtra.Item title="No total usage data" icon={Icon.Circle} />
-        )}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title="Recent Activity">
-        {stats.recentSessions.length > 0 ? (
-          <>
-            <MenuBarExtra.Item
-              title="Recent Sessions"
-              subtitle={`${stats.recentSessions.length} sessions`}
-              icon={Icon.List}
-            />
-            {stats.recentSessions.slice(0, 3).map((session, index) => (
-              <MenuBarExtra.Item
-                key={session.sessionId || `${session.model}-${index}`}
-                title={formatModelName(session.model)}
-                subtitle={`${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTime(session.startTime || session.lastActivity)}`}
-                icon={
-                  (session.model || "").includes("opus")
-                    ? Icon.Crown
-                    : (session.model || "").includes("sonnet")
-                      ? Icon.Star
-                      : (session.model || "").includes("haiku")
-                        ? Icon.Leaf
-                        : Icon.Message
-                }
-              />
-            ))}
-          </>
-        ) : (
-          <MenuBarExtra.Item title="No recent sessions" icon={Icon.Circle} />
-        )}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title="Top Models">
-        {stats.topModels.length > 0 ? (
-          stats.topModels
-            .slice(0, 3)
-            .map((model, index) => (
-              <MenuBarExtra.Item
-                key={`top-model-${model.model || "unknown"}-${index}`}
-                title={formatModelName(model.model)}
-                subtitle={`${formatTokens(model.totalTokens)} • ${formatCost(model.cost)}`}
-                icon={
-                  (model.model || "").includes("opus")
-                    ? Icon.Crown
-                    : (model.model || "").includes("sonnet")
-                      ? Icon.Star
-                      : (model.model || "").includes("haiku")
-                        ? Icon.Leaf
-                        : Icon.Message
-                }
-              />
-            ))
-        ) : (
-          <MenuBarExtra.Item title="No model data" icon={Icon.Circle} />
-        )}
+        <MenuBarExtra.Item
+          title="Total Cost"
+          subtitle={
+            totalUsage 
+              ? `${formatCost(totalUsage.cost)} • ${formatTokensAsMTok(totalUsage.totalTokens)}`
+              : "No usage data"
+          }
+          icon={Icon.Coins}
+        />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Actions">
-        <MenuBarExtra.Item title="Open Claude Code" icon={Icon.Globe} onAction={() => open("https://claude.ai/code")} />
+        <MenuBarExtra.Item 
+          title="Open Claude Code" 
+          icon={Icon.Globe} 
+          onAction={() => open("https://claude.ai/code")} 
+        />
         <MenuBarExtra.Item
           title="Open Usage Monitor"
           icon={Icon.BarChart}
