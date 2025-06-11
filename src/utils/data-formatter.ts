@@ -30,10 +30,10 @@ export class DataFormatter {
   static formatDate(dateString: string): string {
     try {
       const date = new Date(dateString);
-      return new Intl.DateTimeFormat("en-US", {
+      return new Intl.DateTimeFormat("ja-JP", {
         year: "numeric",
-        month: "short",
-        day: "numeric",
+        month: "2-digit",
+        day: "2-digit",
       }).format(date);
     } catch {
       return dateString;
@@ -99,5 +99,14 @@ export class DataFormatter {
     if (totalTokens === 0) return "$0.000";
     const costPerToken = cost / totalTokens;
     return `$${costPerToken.toFixed(6)}`;
+  }
+
+  static formatTodaysDate(): string {
+    const today = new Date();
+    return new Intl.DateTimeFormat("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(today);
   }
 }

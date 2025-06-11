@@ -46,20 +46,6 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
     }
   };
 
-  const getAccessories = () => {
-    if (error) {
-      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
-    }
-
-    if (!dailyUsage) {
-      return [{ text: "No usage today", icon: Icon.Calendar }];
-    }
-
-    return [
-      { text: DataFormatter.formatTokens(dailyUsage.totalTokens), icon: Icon.Text },
-      { text: DataFormatter.formatCost(dailyUsage.cost), icon: Icon.Coins },
-    ];
-  };
 
   const getDetailMetadata = () => {
     if (error) {
@@ -131,10 +117,8 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
   return (
     <List.Item
       id="daily"
-      title={dailyUsage ? `Today (${dailyUsage.date})` : "Today"}
-      subtitle={dailyUsage ? `${DataFormatter.formatTokens(dailyUsage.totalTokens)} tokens • ${DataFormatter.formatCost(dailyUsage.cost)}` : "No usage today"}
+      title={dailyUsage ? `Today (${DataFormatter.formatDate(dailyUsage.date)})` : "Today"}
       icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
-      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
