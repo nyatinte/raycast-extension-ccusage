@@ -1,16 +1,26 @@
-export interface RuntimeConfig {
-  type: "npx" | "bunx" | "pnpm" | "deno";
-  path?: string;
-  verified: boolean;
-  lastChecked?: string;
-}
+import { z } from "zod";
 
-export interface RuntimeSettings {
-  selectedRuntime?: RuntimeConfig["type"];
-  customPath?: string;
-  runtimes: Partial<Record<RuntimeConfig["type"], RuntimeConfig>>;
-  initialized: boolean;
-}
+// Runtime type enum
+export const RuntimeTypeSchema = z.enum(["npx", "bunx", "pnpm", "deno"]);
+
+export const RuntimeConfigSchema = z.object({
+  type: RuntimeTypeSchema,
+  path: z.string().optional(),
+  verified: z.boolean(),
+  lastChecked: z.string().optional(),
+});
+
+export const RuntimeSettingsSchema = z.object({
+  selectedRuntime: RuntimeTypeSchema.optional(),
+  customPath: z.string().optional(),
+  runtimes: z.record(RuntimeTypeSchema, RuntimeConfigSchema.partial()).optional(),
+  initialized: z.boolean(),
+});
+
+// Export types inferred from schemas
+export type RuntimeType = z.infer<typeof RuntimeTypeSchema>;
+export type RuntimeConfig = z.infer<typeof RuntimeConfigSchema>;
+export type RuntimeSettings = z.infer<typeof RuntimeSettingsSchema>;
 
 export const DEFAULT_RUNTIME_SETTINGS: RuntimeSettings = {
   runtimes: {},
@@ -30,4 +40,15 @@ export const RUNTIME_COMMANDS = {
     "-N=raw.githubusercontent.com:443",
     "npm:ccusage@latest",
   ],
-} as const;
+} as const satisfies Record<RuntimeType, readonly string[]>;
+
+// Validation helpers
+export const validateRuntimeSettings = (data: unknown): RuntimeSettings | null => {
+  const result = RuntimeSettingsSchema.safeParse(data);
+  return result.success ? result.data : null;
+};
+
+export const validateRuntimeConfig = (data: unknown): RuntimeConfig | null => {
+  const result = RuntimeConfigSchema.safeParse(data);
+  return result.success ? result.data : null;
+};
