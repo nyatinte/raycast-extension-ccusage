@@ -6,8 +6,8 @@ import { UsageCalculator } from "../utils/usage-calculator";
 
 function getEnhancedNodePaths(): string {
   const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
-  
-  const platformPaths = isAppleSilicon 
+
+  const platformPaths = isAppleSilicon
     ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
     : ["/usr/local/bin", "/usr/local/lib/node_modules/.bin"];
 
@@ -18,21 +18,11 @@ function getEnhancedNodePaths(): string {
     `${process.env.HOME}/.volta/bin`,
   ];
 
-  const systemPaths = [
-    "/usr/bin",
-    "/bin",
-    `${process.env.HOME}/.npm/bin`,
-    `${process.env.HOME}/.yarn/bin`,
-  ];
+  const systemPaths = ["/usr/bin", "/bin", `${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`];
 
-  const allPaths = [
-    process.env.PATH || "",
-    ...platformPaths,
-    ...versionManagerPaths,
-    ...systemPaths,
-  ];
+  const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
-  return allPaths.filter(path => path).join(":");
+  return allPaths.filter((path) => path).join(":");
 }
 
 const execOptions = {
@@ -49,11 +39,7 @@ const execOptions = {
 };
 
 export function useUsageData() {
-  const { data: rawData, isLoading, error, revalidate } = useExec(
-    "npx", 
-    ["ccusage@latest", "--json"], 
-    execOptions
-  );
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--json"], execOptions);
 
   // Parse and process the data
   let data: UsageData = {
@@ -67,14 +53,16 @@ export function useUsageData() {
   if (rawData && !error) {
     try {
       const parsed: CCUsageOutput = JSON.parse(rawData);
-      
+
       // Process total usage
-      const total = parsed.totals ? {
-        inputTokens: parsed.totals.inputTokens || 0,
-        outputTokens: parsed.totals.outputTokens || 0,
-        totalTokens: parsed.totals.totalTokens || 0,
-        cost: parsed.totals.totalCost || 0,
-      } : null;
+      const total = parsed.totals
+        ? {
+            inputTokens: parsed.totals.inputTokens || 0,
+            outputTokens: parsed.totals.outputTokens || 0,
+            totalTokens: parsed.totals.totalTokens || 0,
+            cost: parsed.totals.totalCost || 0,
+          }
+        : null;
 
       data = {
         daily: null, // Will be handled by useDailyUsage
@@ -97,11 +85,12 @@ export function useUsageData() {
 }
 
 export function useDailyUsage(refreshInterval: number = 10000) {
-  const { data: rawData, isLoading, error, revalidate } = useExec(
-    "npx", 
-    ["ccusage@latest", "daily", "--json"], 
-    execOptions
-  );
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    revalidate,
+  } = useExec("npx", ["ccusage@latest", "daily", "--json"], execOptions);
 
   let data: DailyUsageData | null = null;
 
@@ -109,7 +98,7 @@ export function useDailyUsage(refreshInterval: number = 10000) {
     try {
       const parsed: CCUsageOutput = JSON.parse(rawData);
       const today = new Date().toISOString().split("T")[0];
-      
+
       if (parsed.daily && parsed.daily.length > 0) {
         const todayEntry = parsed.daily.find((d) => d.date === today);
         if (todayEntry) {
@@ -138,18 +127,14 @@ export function useDailyUsage(refreshInterval: number = 10000) {
 }
 
 export function useTotalUsage(refreshInterval: number = 30000) {
-  const { data: rawData, isLoading, error, revalidate } = useExec(
-    "npx", 
-    ["ccusage@latest", "--json"], 
-    execOptions
-  );
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--json"], execOptions);
 
-  let data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number; } | null = null;
+  let data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null = null;
 
   if (rawData && !error) {
     try {
       const parsed: CCUsageOutput = JSON.parse(rawData);
-      
+
       if (parsed.totals) {
         data = {
           inputTokens: parsed.totals.inputTokens || 0,
@@ -171,11 +156,12 @@ export function useTotalUsage(refreshInterval: number = 30000) {
 }
 
 export function useSessionUsage(refreshInterval: number = 15000) {
-  const { data: rawData, isLoading, error, revalidate } = useExec(
-    "npx", 
-    ["ccusage@latest", "session", "--json"], 
-    execOptions
-  );
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    revalidate,
+  } = useExec("npx", ["ccusage@latest", "session", "--json"], execOptions);
 
   let data: SessionData[] = [];
 
@@ -183,7 +169,7 @@ export function useSessionUsage(refreshInterval: number = 15000) {
     try {
       const parsed: CCUsageOutput = JSON.parse(rawData);
       const sessions = parsed.sessions || [];
-      
+
       data = sessions.map((session) => ({
         ...session,
         cost: session.totalCost || session.cost || 0,
@@ -227,12 +213,8 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
   };
 }
 
-export function useCCUsageAvailability() {
-  const { data: rawData, isLoading, error, revalidate } = useExec(
-    "npx", 
-    ["ccusage@latest", "--help"], 
-    execOptions
-  );
+export function useccusageAvailability() {
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--help"], execOptions);
 
   return {
     isAvailable: !error && rawData !== undefined,
@@ -249,11 +231,7 @@ export function useUsageByPeriod(since: string, until?: string, refreshInterval:
   }
   args.push("--json");
 
-  const { data: rawData, isLoading, error, revalidate } = useExec(
-    "npx", 
-    args, 
-    execOptions
-  );
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", args, execOptions);
 
   let data: CCUsageOutput | null = null;
 

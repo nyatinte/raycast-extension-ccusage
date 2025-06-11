@@ -1,78 +1,56 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { cpus } from "os";
 import { CCUsageCommandResult, CCUsageOutput, DailyUsageData, SessionData, UsageData } from "../types/usage-types";
+import { RUNTIME_COMMANDS } from "../types/runtime-types";
+import { getSelectedRuntime, getSelectedRuntimePath } from "./runtime-settings";
 
 const execAsync = promisify(exec);
-const CCUSAGE_COMMAND = "npx ccusage@latest";
 
-function getEnhancedNodePaths(): string {
-  const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
-  
-  // Platform-specific paths based on architecture
-  const platformPaths = isAppleSilicon 
-    ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
-    : ["/usr/local/bin", "/usr/local/lib/node_modules/.bin"];
+/**
+ * 設定されたランタイムでccusageコマンドを構築
+ */
+async function buildccusageCommand(args: string): Promise<string> {
+  try {
+    const selectedRuntime = await getSelectedRuntime();
+    const customPath = await getSelectedRuntimePath();
 
-  // Version manager paths
-  const versionManagerPaths = [
-    `${process.env.HOME}/.nvm/versions/node/*/bin`,
-    `${process.env.HOME}/.fnm/node-versions/*/installation/bin`,
-    `${process.env.HOME}/.n/bin`,
-    `${process.env.HOME}/.volta/bin`,
-  ];
+    if (!selectedRuntime) {
+      return `npx ccusage@latest ${args}`;
+    }
 
-  // Standard system paths
-  const systemPaths = [
-    "/usr/bin",
-    "/bin",
-    `${process.env.HOME}/.npm/bin`,
-    `${process.env.HOME}/.yarn/bin`,
-  ];
+    const commands = RUNTIME_COMMANDS[selectedRuntime];
 
-  const allPaths = [
-    process.env.PATH || "",
-    ...platformPaths,
-    ...versionManagerPaths,
-    ...systemPaths,
-  ];
+    // Use custom path if specified, otherwise use commands directly
+    if (customPath && commands.length > 0) {
+      const modifiedCommands = [customPath, ...commands.slice(1)];
+      return `${modifiedCommands.join(" ")} ${args}`;
+    }
 
-  return allPaths.filter(path => path).join(":");
+    return `${commands.join(" ")} ${args}`;
+  } catch (error) {
+    console.error("Failed to build ccusage command:", error);
+    return `npx ccusage@latest ${args}`;
+  }
 }
 
 async function executeCommand(args: string): Promise<CCUsageCommandResult> {
   try {
-    const command = `${CCUSAGE_COMMAND} ${args}`;
-
-    // Enhanced environment with comprehensive PATH and Node.js version manager support
-    const enhancedEnv = {
-      ...process.env,
-      PATH: getEnhancedNodePaths(),
-      // Support for nvm
-      NVM_DIR: process.env.NVM_DIR || `${process.env.HOME}/.nvm`,
-      // Support for fnm
-      FNM_DIR: process.env.FNM_DIR || `${process.env.HOME}/.fnm`,
-      // Ensure proper npm config
-      npm_config_prefix: process.env.npm_config_prefix || `${process.env.HOME}/.npm-global`,
-    };
+    const command = await buildccusageCommand(args);
 
     const { stdout, stderr } = await execAsync(command, {
-      env: enhancedEnv,
-      shell: "/bin/bash", // Use bash shell explicitly for best compatibility
-      timeout: 30000, // 30 second timeout as recommended
-      cwd: process.env.HOME, // Execute from home directory
+      timeout: 30000,
+      maxBuffer: 1024 * 1024,
     });
 
     return { stdout, stderr };
   } catch (error: unknown) {
     const execError = error as { code?: string; message: string };
-    // Enhanced error handling with specific error types
-    if (execError.code === 'ENOENT') {
-      throw new Error(`npx not found: Please install Node.js or check your PATH. Error: ${execError.message}`);
-    } else if (execError.code === 'EACCES') {
-      throw new Error(`Permission denied: Check file permissions for the target directory. Error: ${execError.message}`);
-    } else if (execError.code === 'ETIMEDOUT') {
-      throw new Error(`Command timeout: ccusage command took too long to execute. Error: ${execError.message}`);
+    if (execError.code === "ENOENT") {
+      throw new Error(`Runtime not found: Please check your runtime path. Error: ${execError.message}`);
+    } else if (execError.code === "EACCES") {
+      throw new Error(`Permission denied: Check file permissions. Error: ${execError.message}`);
+    } else if (execError.code === "ETIMEDOUT") {
+      throw new Error(`Command timeout: ccusage command took too long. Error: ${execError.message}`);
     } else {
       throw new Error(`Failed to execute ccusage command: ${execError.message}`);
     }
@@ -217,11 +195,7 @@ export async function getUsageByPeriod(since: string, until?: string): Promise<C
 
 export async function getAllUsageData(): Promise<UsageData> {
   try {
-    const [dailyUsage, totalUsage, sessions] = await Promise.all([
-      getDailyUsage(),
-      getTotalUsage(),
-      getSessionUsage(),
-    ]);
+    const [dailyUsage, totalUsage, sessions] = await Promise.all([getDailyUsage(), getTotalUsage(), getSessionUsage()]);
 
     // Group sessions by model for model breakdown
     const modelMap = new Map();
