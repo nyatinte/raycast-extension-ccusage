@@ -23,6 +23,7 @@
   "dependencies": {
     "@raycast/api": "^1.99.4",
     "@raycast/utils": "^1.17.0",
+    "ccusage": "^0.6.2",
     "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
