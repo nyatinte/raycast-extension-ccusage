@@ -7,7 +7,7 @@ const execAsync = promisify(exec);
 export class CCUsageIntegration {
   private static readonly CCUSAGE_COMMAND = "npx ccusage@latest";
 
-  private static getNodePaths(): string[] {
+  private static getNodePaths(): string {
     // Common Node.js installation paths
     return [
       "/usr/local/bin",
@@ -28,8 +28,6 @@ export class CCUsageIntegration {
       const env = {
         ...process.env,
         PATH: this.getNodePaths(),
-        // Ensure npm global packages are available
-        NODE_PATH: `${process.env.HOME}/.npm-global/lib/node_modules:${process.env.NODE_PATH || ""}`,
       };
 
       const { stdout, stderr } = await execAsync(command, {
