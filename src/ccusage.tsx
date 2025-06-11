@@ -1,8 +1,5 @@
-import { List, Icon, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, Icon, Action, ActionPanel, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
-import { isInitialized, hasValidRuntimeConfig, resetRuntimeSettings } from "./utils/runtime-settings";
-import RuntimeSetup from "./components/RuntimeSetup";
 import DailyUsage from "./components/DailyUsage";
 import SessionUsage from "./components/SessionUsage";
 import CostAnalysis from "./components/CostAnalysis";
@@ -14,52 +11,12 @@ type Preferences = {
 
 export default function ccusage() {
   const preferences = getPreferenceValues<Preferences>();
-  const [initialized, setInitialized] = useState(false);
-  const [hasValidConfig, setHasValidConfig] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
 
   // All hooks must be called at the top level
   const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
   const stats = useUsageStats();
 
-  const checkInitialization = async () => {
-    setIsLoading(true);
-    try {
-      const [initResult, configResult] = await Promise.all([isInitialized(), hasValidRuntimeConfig()]);
-      setInitialized(initResult);
-      setHasValidConfig(configResult);
-    } catch (error) {
-      console.error("Failed to check initialization:", error);
-      setInitialized(false);
-      setHasValidConfig(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    checkInitialization();
-  }, []);
-
-  // Show setup first if not initialized
-  if (isLoading) {
-    return <List isLoading={true} />;
-  }
-
-  // Runtime configuration is mandatory - show setup if not configured
-  if (!initialized || !hasValidConfig || showSettings) {
-    return (
-      <RuntimeSetup
-        onComplete={() => {
-          setShowSettings(false);
-          checkInitialization();
-        }}
-      />
-    );
-  }
-
-  // After runtime is configured, check ccusage availability
+  // Check ccusage availability
   if (availabilityLoading) {
     return <List isLoading={true} />;
   }
@@ -74,7 +31,12 @@ export default function ccusage() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Install Ccusage" url="https://github.com/ryoppippi/ccusage" />
-              <Action title="Reconfigure Runtime" icon={Icon.Gear} onAction={() => setShowSettings(true)} />
+              <Action 
+                title="Configure Runtime in Preferences" 
+                icon={Icon.Gear} 
+                onAction={openExtensionPreferences}
+                shortcut={{ modifiers: ["cmd"], key: "," }}
+              />
             </ActionPanel>
           }
         />
@@ -87,19 +49,10 @@ export default function ccusage() {
   const settingsActions = (
     <>
       <Action
-        title="Runtime Settings"
+        title="Open Preferences"
         icon={Icon.Gear}
-        shortcut={{ modifiers: ["cmd"], key: "k" }}
-        onAction={() => setShowSettings(true)}
-      />
-      <Action
-        title="Reset Settings"
-        icon={Icon.Trash}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-        onAction={async () => {
-          await resetRuntimeSettings();
-          setShowSettings(true);
-        }}
+        shortcut={{ modifiers: ["cmd"], key: "," }}
+        onAction={openExtensionPreferences}
       />
     </>
   );
