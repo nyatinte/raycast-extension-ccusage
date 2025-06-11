@@ -2,35 +2,43 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { CCUsageCommandResult, CCUsageOutput, DailyUsageData, SessionData, UsageData } from "../types/usage-types";
 import { RUNTIME_COMMANDS } from "../types/runtime-types";
-import { getSelectedRuntime, getSelectedRuntimePath } from "./runtime-settings";
+import { getSelectedRuntime, getSelectedRuntimePath, hasValidRuntimeConfig } from "./runtime-settings";
 
 const execAsync = promisify(exec);
+
+/**
+ * ランタイム設定の事前チェック
+ */
+async function ensureRuntimeConfigured(): Promise<void> {
+  const hasValidConfig = await hasValidRuntimeConfig();
+  if (!hasValidConfig) {
+    throw new Error("Runtime configuration is required. Please configure your runtime in Settings (⌘K).");
+  }
+}
 
 /**
  * 設定されたランタイムでccusageコマンドを構築
  */
 async function buildccusageCommand(args: string): Promise<string> {
-  try {
-    const selectedRuntime = await getSelectedRuntime();
-    const customPath = await getSelectedRuntimePath();
+  await ensureRuntimeConfigured();
+  
+  const selectedRuntime = await getSelectedRuntime();
+  const customPath = await getSelectedRuntimePath();
 
-    if (!selectedRuntime) {
-      return `npx ccusage@latest ${args}`;
-    }
-
-    const commands = RUNTIME_COMMANDS[selectedRuntime];
-
-    // Use custom path if specified, otherwise use commands directly
-    if (customPath && commands.length > 0) {
-      const modifiedCommands = [customPath, ...commands.slice(1)];
-      return `${modifiedCommands.join(" ")} ${args}`;
-    }
-
-    return `${commands.join(" ")} ${args}`;
-  } catch (error) {
-    console.error("Failed to build ccusage command:", error);
-    return `npx ccusage@latest ${args}`;
+  // At this point, selectedRuntime should never be null due to ensureRuntimeConfigured()
+  if (!selectedRuntime) {
+    throw new Error("Internal error: Runtime configuration validation failed.");
   }
+
+  const commands = RUNTIME_COMMANDS[selectedRuntime];
+
+  // Use custom path if specified, otherwise use commands directly
+  if (customPath && commands.length > 0) {
+    const modifiedCommands = [customPath, ...commands.slice(1)];
+    return `${modifiedCommands.join(" ")} ${args}`;
+  }
+
+  return `${commands.join(" ")} ${args}`;
 }
 
 async function executeCommand(args: string): Promise<CCUsageCommandResult> {
@@ -45,14 +53,16 @@ async function executeCommand(args: string): Promise<CCUsageCommandResult> {
     return { stdout, stderr };
   } catch (error: unknown) {
     const execError = error as { code?: string; message: string };
+    
     if (execError.code === "ENOENT") {
-      throw new Error(`Runtime not found: Please check your runtime path. Error: ${execError.message}`);
+      const selectedRuntime = await getSelectedRuntime();
+      throw new Error(`Runtime '${selectedRuntime}' not found. Please check your runtime configuration in Settings (⌘K).`);
     } else if (execError.code === "EACCES") {
-      throw new Error(`Permission denied: Check file permissions. Error: ${execError.message}`);
+      throw new Error(`Permission denied: Cannot execute the configured runtime. Please check file permissions.`);
     } else if (execError.code === "ETIMEDOUT") {
-      throw new Error(`Command timeout: ccusage command took too long. Error: ${execError.message}`);
+      throw new Error(`Command timeout: ccusage command took too long to execute. Try again or reconfigure runtime.`);
     } else {
-      throw new Error(`Failed to execute ccusage command: ${execError.message}`);
+      throw new Error(`ccusage execution failed: ${execError.message}. Please check your runtime configuration in Settings (⌘K).`);
     }
   }
 }
@@ -239,11 +249,16 @@ export async function getAllUsageData(): Promise<UsageData> {
   }
 }
 
-export async function checkCCUsageAvailable(): Promise<boolean> {
+export async function checkccusageAvailable(): Promise<boolean> {
   try {
+    // First ensure runtime is configured
+    await ensureRuntimeConfigured();
+    
+    // Then try to execute help command
     await executeCommand("--help");
     return true;
-  } catch {
+  } catch (error) {
+    console.error("ccusage availability check failed:", error);
     return false;
   }
 }
