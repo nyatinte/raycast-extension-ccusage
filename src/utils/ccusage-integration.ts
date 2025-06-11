@@ -71,96 +71,74 @@ async function executeCommand(args: string): Promise<CCUsageCommandResult> {
   }
 }
 
-export async function getDailyUsage(date?: string): Promise<DailyUsageData | null> {
-  try {
-    const dateArg = date ? `--since ${date} --until ${date}` : "";
-    const result = await executeCommand(`daily ${dateArg} --json`);
+export async function getUserUsage(): Promise<{
+  daily: DailyUsageData | null;
+  total: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    cost: number;
+  } | null;
+  sessions: SessionData[];
+  models: unknown[];
+  error?: string;
+  lastUpdated: string;
+}> {
+  const result = await executeCommand("--json");
 
-    if (!result.stdout.trim()) {
-      return null;
-    }
+  if (!result.stdout.trim()) {
+    throw new Error("No usage data available");
+  }
 
-    const data: CCUsageOutput = JSON.parse(result.stdout);
-
-    // Get today's date
-    const today = new Date().toISOString().split("T")[0];
-
-    // Get today's usage data
-    const todayData = await loadDailyUsageData({
-      since: today,
-      until: today,
-    });
-
-    // Get all-time daily usage data
-    const allTimeData = await loadDailyUsageData({});
-
-    // Get session data
-    const sessionData = await loadSessionData({});
-
-    // Calculate totals for all-time data
-    const allTimeTotals = calculateTotals(allTimeData);
-    const allTimeTotalsObject = createTotalsObject(allTimeTotals);
-
-    // Calculate today's totals
-    let todayTotalTokens = 0;
-    let todayCost = 0;
-    let dailyUsage = null;
-
-    if (todayData.length > 0) {
-      const todayTotals = calculateTotals(todayData);
-      const todayTotalsObject = createTotalsObject(todayTotals);
-      todayTotalTokens = todayTotalsObject.totalTokens;
-      todayCost = todayTotalsObject.totalCost;
-
-      const todayEntry = todayData[0];
-      dailyUsage = {
-        date: today,
-        inputTokens: todayEntry.inputTokens,
-        outputTokens: todayEntry.outputTokens,
-        totalTokens: todayTotalTokens,
-        cost: todayCost,
-      };
-    }
-
-    // Process session data
-    const processedSessions = sessionData.slice(0, 10).map(
-      (session: SessionUsage): SessionData => ({
-        sessionId: session.sessionId || "",
-        projectPath: session.projectPath || "",
-        lastActivity: session.lastActivity || "",
-        inputTokens: session.inputTokens || 0,
-        outputTokens: session.outputTokens || 0,
-        totalTokens: (session.inputTokens || 0) + (session.outputTokens || 0),
-        totalCost: session.totalCost || 0,
-        cost: session.totalCost || 0,
-        model: "claude-sonnet-4-20250514", // ccusage doesn't provide model info, use default
-        projectName: session.projectPath?.split("/").pop() || "Unknown Project",
-      }),
-    );
-
-    return {
-      daily: dailyUsage,
-      total: {
-        inputTokens: allTimeTotalsObject.inputTokens || 0,
-        outputTokens: allTimeTotalsObject.outputTokens || 0,
-        totalTokens: allTimeTotalsObject.totalTokens,
-        cost: allTimeTotalsObject.totalCost,
-      },
-      sessions: processedSessions,
-      models: [],
-      lastUpdated: new Date().toISOString(),
-    };
-  } catch (error) {
-    console.error("Error fetching usage data:", error);
-    return {
-      daily: null,
-      total: null,
-      sessions: [],
-      models: [],
-      error: error instanceof Error ? error.message : String(error),
-      lastUpdated: new Date().toISOString(),
+  const data: CCUsageOutput = JSON.parse(result.stdout);
+  
+  // Get today's date
+  const today = new Date().toISOString().split("T")[0];
+  
+  // Extract daily usage for today
+  let dailyUsage = null;
+  if (data.totalTokens && data.totalTokens > 0) {
+    dailyUsage = {
+      date: today,
+      inputTokens: data.inputTokens || 0,  
+      outputTokens: data.outputTokens || 0,
+      totalTokens: data.totalTokens,
+      cost: data.cost || 0,
     };
   }
+
+  // Extract total usage
+  const totalUsage = {
+    inputTokens: data.inputTokens || 0,
+    outputTokens: data.outputTokens || 0,
+    totalTokens: data.totalTokens || 0,
+    cost: data.cost || 0,
+  };
+
+  // Extract sessions
+  const processedSessions = (data.sessions || []).slice(0, 10).map((session: unknown): SessionData => {
+    const sessionData = session as Record<string, unknown>;
+    return {
+      sessionId: (sessionData.sessionId as string) || "",
+      projectPath: (sessionData.projectPath as string) || "",
+      lastActivity: (sessionData.lastActivity as string) || "",
+      inputTokens: (sessionData.inputTokens as number) || 0,
+      outputTokens: (sessionData.outputTokens as number) || 0,
+      totalTokens: ((sessionData.inputTokens as number) || 0) + ((sessionData.outputTokens as number) || 0),
+      totalCost: (sessionData.totalCost as number) || 0,
+      cost: (sessionData.totalCost as number) || 0,
+      model: "claude-sonnet-4-20250514", // ccusage doesn't provide model info, use default
+      projectName: (sessionData.projectPath as string)?.split("/").pop() || "Unknown Project",
+    };
+  });
+
+  return {
+    daily: dailyUsage,
+    total: totalUsage,
+    sessions: processedSessions,
+    models: [],
+    lastUpdated: new Date().toISOString(),
+  };
 }
 
 export async function getDailyUsage(): Promise<DailyUsageData | null> {
