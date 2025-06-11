@@ -1,49 +1,14 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import { CCUsageCommandResult, CCUsageOutput, DailyUsageData, SessionData, UsageData } from "../types/usage-types";
-import { RUNTIME_COMMANDS } from "../types/runtime-types";
-import { getSelectedRuntime, getSelectedRuntimePath, hasValidRuntimeConfig } from "./runtime-settings";
+import { buildCCUsageCommand, getRuntimeType } from "./preferences";
 
 const execAsync = promisify(exec);
 
-/**
- * ランタイム設定の事前チェック
- */
-async function ensureRuntimeConfigured(): Promise<void> {
-  const hasValidConfig = await hasValidRuntimeConfig();
-  if (!hasValidConfig) {
-    throw new Error("Runtime configuration is required. Please configure your runtime in Settings (⌘K).");
-  }
-}
-
-/**
- * 設定されたランタイムでccusageコマンドを構築
- */
-async function buildccusageCommand(args: string): Promise<string> {
-  await ensureRuntimeConfigured();
-
-  const selectedRuntime = await getSelectedRuntime();
-  const customPath = await getSelectedRuntimePath();
-
-  // At this point, selectedRuntime should never be null due to ensureRuntimeConfigured()
-  if (!selectedRuntime) {
-    throw new Error("Internal error: Runtime configuration validation failed.");
-  }
-
-  const commands = RUNTIME_COMMANDS[selectedRuntime];
-
-  // Use custom path if specified, otherwise use commands directly
-  if (customPath && commands.length > 0) {
-    const modifiedCommands = [customPath, ...commands.slice(1)];
-    return `${modifiedCommands.join(" ")} ${args}`;
-  }
-
-  return `${commands.join(" ")} ${args}`;
-}
 
 async function executeCommand(args: string): Promise<CCUsageCommandResult> {
   try {
-    const command = await buildccusageCommand(args);
+    const command = buildCCUsageCommand(args);
 
     const { stdout, stderr } = await execAsync(command, {
       timeout: 30000,
@@ -55,9 +20,9 @@ async function executeCommand(args: string): Promise<CCUsageCommandResult> {
     const execError = error as { code?: string; message: string };
 
     if (execError.code === "ENOENT") {
-      const selectedRuntime = await getSelectedRuntime();
+      const runtimeType = getRuntimeType();
       throw new Error(
-        `Runtime '${selectedRuntime}' not found. Please check your runtime configuration in Settings (⌘K).`,
+        `Runtime '${runtimeType}' not found. Please configure your runtime in Preferences (⌘,).`,
       );
     } else if (execError.code === "EACCES") {
       throw new Error(`Permission denied: Cannot execute the configured runtime. Please check file permissions.`);
@@ -65,7 +30,7 @@ async function executeCommand(args: string): Promise<CCUsageCommandResult> {
       throw new Error(`Command timeout: ccusage command took too long to execute. Try again or reconfigure runtime.`);
     } else {
       throw new Error(
-        `ccusage execution failed: ${execError.message}. Please check your runtime configuration in Settings (⌘K).`,
+        `ccusage execution failed: ${execError.message}. Please check your runtime configuration in Preferences (⌘,).`,
       );
     }
   }
@@ -209,10 +174,7 @@ export async function getAllUsageData(): Promise<UsageData> {
 
 export async function checkccusageAvailable(): Promise<boolean> {
   try {
-    // First ensure runtime is configured
-    await ensureRuntimeConfigured();
-
-    // Then try to execute help command
+    // Try to execute help command
     await executeCommand("--help");
     return true;
   } catch (error) {
