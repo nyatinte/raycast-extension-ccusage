@@ -35,7 +35,7 @@ export default function ccusage() {
                 title="Configure Runtime in Preferences"
                 icon={Icon.Gear}
                 onAction={openExtensionPreferences}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
             </ActionPanel>
           }
@@ -51,7 +51,7 @@ export default function ccusage() {
       <Action
         title="Open Preferences"
         icon={Icon.Gear}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         onAction={openExtensionPreferences}
       />
     </>
