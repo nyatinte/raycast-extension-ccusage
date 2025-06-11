@@ -1,11 +1,9 @@
 import { DailyUsageData, SessionData, UsageData } from "../types/usage-types";
+import { loadDailyUsageData, loadSessionData } from "ccusage/data-loader";
+import { calculateTotals, createTotalsObject } from "ccusage/calculate-cost";
 
 async function getUserUsage(): Promise<UsageData> {
   try {
-    // @ts-expect-error - dynamic import of ESM module
-    const { loadDailyUsageData, loadSessionData } = await import("ccusage/data-loader");
-    // @ts-expect-error - dynamic import of ESM module
-    const { calculateTotals, createTotalsObject } = await import("ccusage/calculate-cost");
 
     const today = new Date().toISOString().split("T")[0];
 
@@ -111,8 +109,7 @@ export async function getAllUsageData(): Promise<UsageData> {
 
 export async function checkCCUsageAvailable(): Promise<boolean> {
   try {
-    // @ts-expect-error - dynamic import of ESM module
-    await import("ccusage/data-loader");
+    await loadDailyUsageData({});
     return true;
   } catch {
     return false;
