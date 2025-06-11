@@ -91,16 +91,16 @@ export async function getUserUsage(): Promise<{
   }
 
   const data: CCUsageOutput = JSON.parse(result.stdout);
-  
+
   // Get today's date
   const today = new Date().toISOString().split("T")[0];
-  
+
   // Extract daily usage for today
   let dailyUsage = null;
   if (data.totalTokens && data.totalTokens > 0) {
     dailyUsage = {
       date: today,
-      inputTokens: data.inputTokens || 0,  
+      inputTokens: data.inputTokens || 0,
       outputTokens: data.outputTokens || 0,
       totalTokens: data.totalTokens,
       cost: data.cost || 0,

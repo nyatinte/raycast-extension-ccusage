@@ -1,122 +1,73 @@
-export class DataFormatter {
-  static formatTokens(tokens: number | null | undefined): string {
-    if (tokens === null || tokens === undefined) return "0";
+import { format, formatDistanceToNow, isValid, parseISO } from "date-fns";
+import { match } from "ts-pattern";
 
-    if (tokens < 1000) {
-      return tokens.toString();
-    } else if (tokens < 1000000) {
-      return `${(tokens / 1000).toFixed(1)}K`;
-    } else {
-      return `${(tokens / 1000000).toFixed(1)}M`;
-    }
-  }
+export const formatTokens = (tokens: number | null | undefined): string => {
+  if (tokens === null || tokens === undefined) return "0";
 
-  static formatCost(cost: number | null | undefined): string {
-    if (cost === null || cost === undefined) return "$0.00";
+  return match(tokens)
+    .when(
+      (t) => t < 1000,
+      (t) => t.toString(),
+    )
+    .when(
+      (t) => t < 1000000,
+      (t) => `${(t / 1000).toFixed(1)}K`,
+    )
+    .otherwise((t) => `${(t / 1000000).toFixed(1)}M`);
+};
 
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(cost);
-  }
+export const formatCost = (cost: number | null | undefined): string => {
+  if (cost === null || cost === undefined) return "$0.00";
 
-  static formatPercentage(value: number, total: number): string {
-    if (total === 0) return "0%";
-    return `${((value / total) * 100).toFixed(1)}%`;
-  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  }).format(cost);
+};
 
-  static formatDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat("ja-JP", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(date);
-    } catch {
-      return dateString;
-    }
-  }
+export const formatDate = (dateString: string): string => {
+  const date = parseISO(dateString);
+  return isValid(date) ? format(date, "yyyy/MM/dd") : dateString;
+};
 
-  static formatDateTime(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
-    } catch {
-      return dateString;
-    }
-  }
+export const formatDateTime = (dateString: string): string => {
+  const date = parseISO(dateString);
+  return isValid(date) ? format(date, "MMM dd, yyyy HH:mm") : dateString;
+};
 
-  static formatRelativeTime(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+export const formatRelativeTime = (dateString: string): string => {
+  const date = parseISO(dateString);
+  return isValid(date) ? formatDistanceToNow(date, { addSuffix: true }) : dateString;
+};
 
-      if (diffMins < 1) return "Just now";
-      if (diffMins < 60) return `${diffMins}m ago`;
-      if (diffHours < 24) return `${diffHours}h ago`;
-      if (diffDays < 7) return `${diffDays}d ago`;
+export const formatModelName = (model: string | null | undefined): string => {
+  if (!model) return "Unknown Model";
 
-      return this.formatDate(dateString);
-    } catch {
-      return dateString;
-    }
-  }
+  return match(model)
+    .with("claude-opus-4-20250514", "claude-opus-4-0", () => "Claude Opus 4")
+    .with("claude-sonnet-4-20250514", "claude-sonnet-4-0", () => "Claude Sonnet 4")
+    .with("claude-3-5-sonnet-20241022", () => "Claude 3.5 Sonnet")
+    .with("claude-3-5-sonnet-20240620", () => "Claude 3.5 Sonnet (Legacy)")
+    .with("claude-3-opus-20240229", () => "Claude 3 Opus")
+    .with("claude-3-sonnet-20240229", () => "Claude 3 Sonnet")
+    .with("claude-3-haiku-20240307", () => "Claude 3 Haiku")
+    .otherwise(() => model);
+};
 
-  static formatModelName(model: string | null | undefined): string {
-    if (!model) return "Unknown Model";
+export const getTokenEfficiency = (inputTokens: number, outputTokens: number): string => {
+  if (inputTokens === 0) return "N/A";
+  const ratio = outputTokens / inputTokens;
+  return `${ratio.toFixed(2)}x`;
+};
 
-    const modelNames: Record<string, string> = {
-      "claude-opus-4-20250514": "Claude Opus 4",
-      "claude-opus-4-0": "Claude Opus 4",
-      "claude-sonnet-4-20250514": "Claude Sonnet 4",
-      "claude-sonnet-4-0": "Claude Sonnet 4",
-      "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
-      "claude-3-5-sonnet-20240620": "Claude 3.5 Sonnet (Legacy)",
-      "claude-3-opus-20240229": "Claude 3 Opus",
-      "claude-3-sonnet-20240229": "Claude 3 Sonnet",
-      "claude-3-haiku-20240307": "Claude 3 Haiku",
-    };
+export const getCostPerMTok = (cost: number, totalTokens: number): string => {
+  if (totalTokens === 0) return "$0.00/MTok";
+  const costPerMTok = (cost / totalTokens) * 1000000;
+  return `$${costPerMTok.toFixed(2)}/MTok`;
+};
 
-    return modelNames[model] || model;
-  }
-
-  static getTokenEfficiency(inputTokens: number, outputTokens: number): string {
-    if (inputTokens === 0) return "N/A";
-    const ratio = outputTokens / inputTokens;
-    return `${ratio.toFixed(2)}x`;
-  }
-
-  static getCostPerToken(cost: number, totalTokens: number): string {
-    if (totalTokens === 0) return "$0.000";
-    const costPerToken = cost / totalTokens;
-    return `$${costPerToken.toFixed(6)}`;
-  }
-
-  static getCostPerMTok(cost: number, totalTokens: number): string {
-    if (totalTokens === 0) return "$0.00/MTok";
-    const costPerMTok = (cost / totalTokens) * 1000000;
-    return `$${costPerMTok.toFixed(2)}/MTok`;
-  }
-
-  static formatTodaysDate(): string {
-    const today = new Date();
-    return new Intl.DateTimeFormat("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(today);
-  }
-}
+export const formatTodaysDate = (): string => {
+  return format(new Date(), "yyyy/MM/dd");
+};
