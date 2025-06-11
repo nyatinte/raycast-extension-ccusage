@@ -1,10 +1,9 @@
 import { DailyUsageData, SessionData, UsageData } from "../types/usage-types";
-import { loadDailyUsageData, loadSessionData } from "ccusage/data-loader";
+import { loadDailyUsageData, loadSessionData, type SessionUsage } from "ccusage/data-loader";
 import { calculateTotals, createTotalsObject } from "ccusage/calculate-cost";
 
 async function getUserUsage(): Promise<UsageData> {
   try {
-
     const today = new Date().toISOString().split("T")[0];
 
     // Get today's usage data
@@ -33,7 +32,7 @@ async function getUserUsage(): Promise<UsageData> {
       const todayTotalsObject = createTotalsObject(todayTotals);
       todayTotalTokens = todayTotalsObject.totalTokens;
       todayCost = todayTotalsObject.totalCost;
-      
+
       const todayEntry = todayData[0];
       dailyUsage = {
         date: today,
@@ -45,18 +44,20 @@ async function getUserUsage(): Promise<UsageData> {
     }
 
     // Process session data
-    const processedSessions = sessionData.slice(0, 10).map((session: any) => ({
-      sessionId: session.sessionId || "",
-      projectPath: session.projectPath || "",
-      lastActivity: session.lastActivity || session.date || "",
-      inputTokens: session.inputTokens || 0,
-      outputTokens: session.outputTokens || 0,
-      totalTokens: session.inputTokens + session.outputTokens || 0,
-      totalCost: session.totalCost || 0,
-      cost: session.totalCost || 0,
-      model: session.model || "claude-3-5-sonnet-20241022",
-      projectName: session.projectPath?.split("/").pop() || "Unknown Project",
-    }));
+    const processedSessions = sessionData.slice(0, 10).map(
+      (session: SessionUsage): SessionData => ({
+        sessionId: session.sessionId || "",
+        projectPath: session.projectPath || "",
+        lastActivity: session.lastActivity || "",
+        inputTokens: session.inputTokens || 0,
+        outputTokens: session.outputTokens || 0,
+        totalTokens: (session.inputTokens || 0) + (session.outputTokens || 0),
+        totalCost: session.totalCost || 0,
+        cost: session.totalCost || 0,
+        model: "claude-sonnet-4-20250514", // ccusage doesn't provide model info, use default
+        projectName: session.projectPath?.split("/").pop() || "Unknown Project",
+      }),
+    );
 
     return {
       daily: dailyUsage,

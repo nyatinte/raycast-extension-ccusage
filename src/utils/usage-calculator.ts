@@ -40,7 +40,7 @@ export class UsageCalculator {
   }
 
   static getRecentSessions(sessions: SessionData[], limit: number = 10): SessionData[] {
-    return sessions.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).slice(0, limit);
+    return sessions.sort((a, b) => new Date(b.startTime || b.lastActivity).getTime() - new Date(a.startTime || a.lastActivity).getTime()).slice(0, limit);
   }
 
   static calculateAverageSessionCost(sessions: SessionData[]): number {
@@ -57,7 +57,7 @@ export class UsageCalculator {
 
   static getSessionsByTimeRange(sessions: SessionData[], hours: number): SessionData[] {
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
-    return sessions.filter((session) => new Date(session.startTime) >= cutoff);
+    return sessions.filter((session) => new Date(session.startTime || session.lastActivity) >= cutoff);
   }
 
   static calculateCostBreakdown(models: ModelUsage[]): {
@@ -146,10 +146,10 @@ export class UsageCalculator {
     // Find most efficient model (lowest cost per output token)
     const modelEfficiency = new Map<string, { cost: number; output: number }>();
     sessions.forEach((session) => {
-      const existing = modelEfficiency.get(session.model) || { cost: 0, output: 0 };
+      const existing = modelEfficiency.get(session.model || "claude-sonnet-4-20250514") || { cost: 0, output: 0 };
       existing.cost += session.cost;
       existing.output += session.outputTokens;
-      modelEfficiency.set(session.model, existing);
+      modelEfficiency.set(session.model || "claude-sonnet-4-20250514", existing);
     });
 
     let mostEfficientModel: string | null = null;
