@@ -1,7 +1,7 @@
 import { useExec } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 import { cpus } from "os";
-import { UsageData, UsageStats, CCUsageOutput, DailyUsageData, SessionData } from "../types/usage-types";
+import { UsageData, UsageStats, CCUsageOutput, DailyUsageData, MonthlyUsageData, SessionData } from "../types/usage-types";
 import { getRecentSessions } from "../utils/usage-calculator";
 
 function getEnhancedNodePaths(): string {
@@ -246,6 +246,40 @@ export function useUsageByPeriod(since: string, until?: string, refreshInterval:
   useInterval(() => {
     revalidate();
   }, refreshInterval);
+
+  return { data, isLoading, error, revalidate };
+}
+
+export function useMonthlyUsage() {
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "monthly", "--json"], execOptions);
+
+  let data: MonthlyUsageData | null = null;
+
+  if (rawData && !error) {
+    try {
+      const parsed: CCUsageOutput = JSON.parse(rawData);
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+
+      if (parsed.monthly && parsed.monthly.length > 0) {
+        const currentMonthEntry = parsed.monthly.find((m) => m.month === currentMonth);
+        if (currentMonthEntry) {
+          data = {
+            ...currentMonthEntry,
+            cost: currentMonthEntry.totalCost || 0,
+          };
+        } else {
+          // If no current month data, return the latest month
+          const latest = parsed.monthly[parsed.monthly.length - 1];
+          data = {
+            ...latest,
+            cost: latest.totalCost || 0,
+          };
+        }
+      }
+    } catch (parseError) {
+      console.error("Failed to parse monthly usage:", parseError);
+    }
+  }
 
   return { data, isLoading, error, revalidate };
 }

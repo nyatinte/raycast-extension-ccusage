@@ -38,6 +38,26 @@ export const ModelUsageSchema = z.object({
   sessionCount: z.number(),
 });
 
+export const MonthlyUsageDataSchema = z.object({
+  month: z.string(),
+  inputTokens: z.number(),
+  outputTokens: z.number(),
+  cacheCreationTokens: z.number().optional(),
+  cacheReadTokens: z.number().optional(),
+  totalTokens: z.number(),
+  totalCost: z.number(),
+  cost: z.number(), // Alias for totalCost for compatibility
+  modelsUsed: z.array(z.string()).optional(),
+  modelBreakdowns: z.array(z.object({
+    modelName: z.string(),
+    inputTokens: z.number(),
+    outputTokens: z.number(),
+    cacheCreationTokens: z.number().optional(),
+    cacheReadTokens: z.number().optional(),
+    cost: z.number(),
+  })).optional(),
+});
+
 export const TotalUsageSchema = z.object({
   inputTokens: z.number(),
   outputTokens: z.number(),
@@ -61,6 +81,7 @@ export const CCUsageCommandResultSchema = z.object({
 
 export const CCUsageOutputSchema = z.object({
   daily: z.array(DailyUsageDataSchema).optional(),
+  monthly: z.array(MonthlyUsageDataSchema).optional(),
   sessions: z.array(SessionDataSchema).optional(),
   totals: z
     .object({
@@ -91,6 +112,7 @@ export const UsageStatsSchema = z.object({
 
 // Export types inferred from schemas
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
+export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
 export type SessionData = z.infer<typeof SessionDataSchema>;
 export type ModelUsage = z.infer<typeof ModelUsageSchema>;
 export type TotalUsage = z.infer<typeof TotalUsageSchema>;
