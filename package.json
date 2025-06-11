@@ -10,14 +10,8 @@
     {
       "name": "ccusage",
       "title": "ccusage",
-      "description": "Monitor Claude Code usage with real-time tracking",
+      "description": "Test ccusage CLI integration with minimal setup",
       "mode": "view"
-    },
-    {
-      "name": "menubar-ccusage",
-      "title": "Menubar ccusage",
-      "description": "Show Claude usage in menu bar",
-      "mode": "menu-bar"
     }
   ],
   "dependencies": {

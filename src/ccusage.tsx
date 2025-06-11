@@ -1,144 +1,135 @@
-import { List, Icon, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
-import { isInitialized, hasValidRuntimeConfig, resetRuntimeSettings } from "./utils/runtime-settings";
-import RuntimeSetup from "./components/RuntimeSetup";
-import DailyUsage from "./components/DailyUsage";
-import SessionUsage from "./components/SessionUsage";
-import CostAnalysis from "./components/CostAnalysis";
-import ModelBreakdown from "./components/ModelBreakdown";
+import { List, Detail, Action, ActionPanel } from "@raycast/api";
+import { useExec } from "@raycast/utils";
+import { cpus } from "os";
 
-interface Preferences {
-  defaultView: string;
-}
+type CommandTest = {
+  id: string;
+  title: string;
+  command: string;
+  args: string[];
+  options?: { env?: NodeJS.ProcessEnv };
+  description: string;
+};
 
-export default function ccusage() {
-  const preferences = getPreferenceValues<Preferences>();
-  const [initialized, setInitialized] = useState(false);
-  const [hasValidConfig, setHasValidConfig] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
+// Common node modules installation paths
+const getNodePaths = () => {
+  const isAppleSilicon = cpus()[0].model.includes("Apple");
+  const homeDir = process.env.HOME || "/Users/unknown";
 
-  // All hooks must be called at the top level
-  const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
-  const stats = useUsageStats();
+  return [
+    // Homebrew paths
+    isAppleSilicon ? "/opt/homebrew/bin" : "/usr/local/bin",
+    isAppleSilicon ? "/opt/homebrew/lib/node_modules/.bin" : "/usr/local/lib/node_modules/.bin",
 
-  const checkInitialization = async () => {
-    setIsLoading(true);
-    try {
-      const [initResult, configResult] = await Promise.all([
-        isInitialized(),
-        hasValidRuntimeConfig()
-      ]);
-      setInitialized(initResult);
-      setHasValidConfig(configResult);
-    } catch (error) {
-      console.error("Failed to check initialization:", error);
-      setInitialized(false);
-      setHasValidConfig(false);
-    } finally {
-      setIsLoading(false);
-    }
+    // Node Version Manager paths
+    `${homeDir}/.nvm/versions/node/current/bin`,
+
+    // Global npm paths
+    `${homeDir}/.npm-global/bin`,
+    `${homeDir}/.local/bin`,
+
+    // Volta paths
+    `${homeDir}/.volta/bin`,
+
+    // Yarn global paths
+    `${homeDir}/.yarn/bin`,
+
+    // System paths
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin",
+  ] as const satisfies readonly string[];
+};
+
+// Create enhanced PATH commands
+const createEnhancedCommands = (): CommandTest[] => {
+  const NODE_PATHS = getNodePaths();
+  const PATH = NODE_PATHS.join(":");
+  const enhancedEnv = {
+    ...process.env,
+    PATH,
   };
 
-  useEffect(() => {
-    checkInitialization();
-  }, []);
+  return [
+    {
+      id: "ccusage-enhanced-json",
+      title: "CCUsage JSON",
+      command: "npx",
+      args: ["ccusage@latest", "--json"],
+      options: { env: enhancedEnv },
+      description: "CCUsage with enhanced PATH",
+    },
+    {
+      id: "ccusage-enhanced-daily",
+      title: "CCUsage Daily",
+      command: "npx",
+      args: ["ccusage@latest", "daily", "--json"],
+      options: { env: enhancedEnv },
+      description: "CCUsage daily stats with enhanced PATH",
+    },
+  ];
+};
 
-  // Show setup first if not initialized
+// Command execution component
+function CommandTest({ command }: { command: CommandTest }) {
+  const { data, isLoading, error } = useExec(command.command, command.args, command.options || {});
+  const commandString = `${command.command} ${command.args.join(" ")}`;
+
   if (isLoading) {
-    return <List isLoading={true} />;
+    return <Detail isLoading={true} markdown={`# Command: \`${commandString}\`\n\nExecuting...`} />;
   }
 
-  // Runtime configuration is mandatory - show setup if not configured
-  if (!initialized || !hasValidConfig || showSettings) {
-    return <RuntimeSetup onComplete={() => {
-      setShowSettings(false);
-      checkInitialization();
-    }} />;
+  if (error) {
+    const errorMarkdown = `# Command: \`${commandString}\`
+
+## Status: ❌ Error
+
+## Description:
+${command.description}
+
+## Error Details:
+\`\`\`
+${error.message}
+\`\`\`
+`;
+    return <Detail markdown={errorMarkdown} />;
   }
 
-  // After runtime is configured, check ccusage availability
-  if (availabilityLoading) {
-    return <List isLoading={true} />;
-  }
+  const successMarkdown = `# Command: \`${commandString}\`
 
-  if (!isAvailable) {
-    return (
-      <List>
+## Status: ✅ Success
+
+## Description:
+${command.description}
+
+## Output:
+\`\`\`
+${data || "(no output)"}
+\`\`\`
+`;
+
+  return <Detail markdown={successMarkdown} />;
+}
+
+export default function CCUsage() {
+  const enhancedCommands = createEnhancedCommands();
+
+  return (
+    <List>
+      {enhancedCommands.map((command) => (
         <List.Item
-          title="ccusage not available"
-          subtitle="ccusage CLI tool is required but not working with the configured runtime"
-          icon={Icon.ExclamationMark}
+          key={command.id}
+          title={command.title}
+          subtitle={command.description}
+          accessories={[{ text: `${command.command} ${command.args.join(" ")}` }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Install ccusage" url="https://github.com/ryoppippi/ccusage" />
-              <Action
-                title="Reconfigure Runtime"
-                icon={Icon.Gear}
-                onAction={() => setShowSettings(true)}
-              />
+              <Action.Push title="Run Test" target={<CommandTest command={command} />} />
             </ActionPanel>
           }
         />
-      </List>
-    );
-  }
-
-  const selectedItemId = preferences.defaultView || "daily";
-
-  const settingsActions = (
-    <>
-      <Action
-        title="Runtime Settings"
-        icon={Icon.Gear}
-        shortcut={{ modifiers: ["cmd"], key: "k" }}
-        onAction={() => setShowSettings(true)}
-      />
-      <Action
-        title="Reset Settings"
-        icon={Icon.Trash}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-        onAction={async () => {
-          await resetRuntimeSettings();
-          setShowSettings(true);
-        }}
-      />
-    </>
-  );
-
-  return (
-    <List 
-      isLoading={stats.isLoading} 
-      selectedItemId={selectedItemId} 
-      isShowingDetail
-    >
-      <DailyUsage 
-        dailyUsage={stats.todayUsage} 
-        isLoading={stats.isLoading} 
-        error={stats.error}
-        settingsActions={settingsActions}
-      />
-      <SessionUsage 
-        sessions={stats.recentSessions} 
-        isLoading={stats.isLoading} 
-        error={stats.error}
-        settingsActions={settingsActions}
-      />
-      <CostAnalysis
-        totalUsage={stats.totalUsage}
-        dailyUsage={stats.todayUsage}
-        models={stats.topModels}
-        isLoading={stats.isLoading}
-        error={stats.error}
-        settingsActions={settingsActions}
-      />
-      <ModelBreakdown 
-        models={stats.topModels} 
-        isLoading={stats.isLoading} 
-        error={stats.error}
-        settingsActions={settingsActions}
-      />
+      ))}
     </List>
   );
 }
