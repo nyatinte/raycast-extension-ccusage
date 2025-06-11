@@ -105,6 +105,12 @@ export class DataFormatter {
     return `$${costPerToken.toFixed(6)}`;
   }
 
+  static getCostPerMTok(cost: number, totalTokens: number): string {
+    if (totalTokens === 0) return "$0.00/MTok";
+    const costPerMTok = (cost / totalTokens) * 1000000;
+    return `$${costPerMTok.toFixed(2)}/MTok`;
+  }
+
   static formatTodaysDate(): string {
     const today = new Date();
     return new Intl.DateTimeFormat("ja-JP", {

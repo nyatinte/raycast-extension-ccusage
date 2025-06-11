@@ -152,13 +152,13 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
 
         <List.Item.Detail.Metadata.Label title="Top Models by Usage" />
         {topModels.slice(0, 5).map((model, index) => {
-          const costPerToken = model.totalTokens > 0 ? model.cost / model.totalTokens : 0;
+          const costPerMTok = DataFormatter.getCostPerMTok(model.cost, model.totalTokens);
 
           return (
             <List.Item.Detail.Metadata.Label
               key={`top-${model.model || "unknown"}-${index}`}
               title={`${index + 1}. ${DataFormatter.formatModelName(model.model)}`}
-              text={`${DataFormatter.formatTokens(model.totalTokens)} • ${DataFormatter.formatCost(model.cost)} • $${costPerToken.toFixed(6)}/token`}
+              text={`${DataFormatter.formatTokens(model.totalTokens)} • ${DataFormatter.formatCost(model.cost)} • ${costPerMTok}`}
               icon={{ source: getModelIcon(model.model), tintColor: getModelIconColor(model.model) }}
             />
           );

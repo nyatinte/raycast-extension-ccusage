@@ -66,7 +66,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
     }
 
     const efficiency = DataFormatter.getTokenEfficiency(dailyUsage.inputTokens, dailyUsage.outputTokens);
-    const costPerToken = DataFormatter.getCostPerToken(dailyUsage.cost, dailyUsage.totalTokens);
+    const costPerMTok = DataFormatter.getCostPerMTok(dailyUsage.cost, dailyUsage.totalTokens);
     const intensity = UsageCalculator.getUsageIntensity(dailyUsage.totalTokens);
 
     return (
@@ -99,7 +99,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
           text={DataFormatter.formatCost(dailyUsage.cost)}
           icon={Icon.Coins}
         />
-        <List.Item.Detail.Metadata.Label title="Cost per Token" text={costPerToken} />
+        <List.Item.Detail.Metadata.Label title="Cost per MTok" text={costPerMTok} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
@@ -113,11 +113,24 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
     );
   };
 
+  const getAccessories = () => {
+    if (error) {
+      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
+    }
+
+    if (!dailyUsage) {
+      return [{ text: "No usage today", icon: Icon.Calendar }];
+    }
+
+    return [{ text: DataFormatter.formatCost(dailyUsage.cost), icon: Icon.Coins }];
+  };
+
   return (
     <List.Item
       id="daily"
       title={dailyUsage ? `Today (${DataFormatter.formatDate(dailyUsage.date)})` : "Today"}
       icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
+      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>

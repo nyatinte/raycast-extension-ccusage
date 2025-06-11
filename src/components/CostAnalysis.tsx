@@ -80,16 +80,16 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
 
         <List.Item.Detail.Metadata.Label title="Cost Efficiency" />
         <List.Item.Detail.Metadata.Label
-          title="Cost per Token"
-          text={DataFormatter.getCostPerToken(totalUsage.cost, totalUsage.totalTokens)}
+          title="Cost per MTok"
+          text={DataFormatter.getCostPerMTok(totalUsage.cost, totalUsage.totalTokens)}
         />
         <List.Item.Detail.Metadata.Label
-          title="Cost per Input Token"
-          text={DataFormatter.getCostPerToken(totalUsage.cost, totalUsage.inputTokens)}
+          title="Cost per Input MTok"
+          text={DataFormatter.getCostPerMTok(totalUsage.cost, totalUsage.inputTokens)}
         />
         <List.Item.Detail.Metadata.Label
-          title="Cost per Output Token"
-          text={DataFormatter.getCostPerToken(totalUsage.cost, totalUsage.outputTokens)}
+          title="Cost per Output MTok"
+          text={DataFormatter.getCostPerMTok(totalUsage.cost, totalUsage.outputTokens)}
         />
         <List.Item.Detail.Metadata.Separator />
 
@@ -140,11 +140,24 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
 
   const mainCost = totalUsage?.cost || 0;
 
+  const getAccessories = () => {
+    if (error) {
+      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
+    }
+
+    if (!totalUsage) {
+      return [{ text: "No cost data", icon: Icon.Circle }];
+    }
+
+    return [{ text: DataFormatter.formatCost(totalUsage.cost), icon: Icon.Coins }];
+  };
+
   return (
     <List.Item
       id="cost-analysis"
       title="Costs"
       icon={{ source: getCostIcon(mainCost), tintColor: getCostColor(mainCost) }}
+      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
