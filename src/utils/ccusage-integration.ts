@@ -21,7 +21,7 @@ async function ensureRuntimeConfigured(): Promise<void> {
  */
 async function buildccusageCommand(args: string): Promise<string> {
   await ensureRuntimeConfigured();
-  
+
   const selectedRuntime = await getSelectedRuntime();
   const customPath = await getSelectedRuntimePath();
 
@@ -53,16 +53,20 @@ async function executeCommand(args: string): Promise<CCUsageCommandResult> {
     return { stdout, stderr };
   } catch (error: unknown) {
     const execError = error as { code?: string; message: string };
-    
+
     if (execError.code === "ENOENT") {
       const selectedRuntime = await getSelectedRuntime();
-      throw new Error(`Runtime '${selectedRuntime}' not found. Please check your runtime configuration in Settings (⌘K).`);
+      throw new Error(
+        `Runtime '${selectedRuntime}' not found. Please check your runtime configuration in Settings (⌘K).`,
+      );
     } else if (execError.code === "EACCES") {
       throw new Error(`Permission denied: Cannot execute the configured runtime. Please check file permissions.`);
     } else if (execError.code === "ETIMEDOUT") {
       throw new Error(`Command timeout: ccusage command took too long to execute. Try again or reconfigure runtime.`);
     } else {
-      throw new Error(`ccusage execution failed: ${execError.message}. Please check your runtime configuration in Settings (⌘K).`);
+      throw new Error(
+        `ccusage execution failed: ${execError.message}. Please check your runtime configuration in Settings (⌘K).`,
+      );
     }
   }
 }
@@ -81,43 +85,87 @@ export async function getDailyUsage(date?: string): Promise<DailyUsageData | nul
     // Get today's date
     const today = new Date().toISOString().split("T")[0];
 
-    // Find today's usage from daily array or use totals as fallback
-    let todayUsage: DailyUsageData | null = null;
+    // Get today's usage data
+    const todayData = await loadDailyUsageData({
+      since: today,
+      until: today,
+    });
 
-    if (data.daily && data.daily.length > 0) {
-      // Find today's entry in the daily array
-      const todayEntry = data.daily.find((d) => d.date === today);
-      if (todayEntry) {
-        todayUsage = {
-          ...todayEntry,
-          cost: todayEntry.totalCost || todayEntry.cost || 0,
-        };
-      } else {
-        // Use the latest entry if today's entry not found
-        const latest = data.daily[data.daily.length - 1];
-        todayUsage = {
-          ...latest,
-          cost: latest.totalCost || latest.cost || 0,
-        };
-      }
-    } else if (data.totals) {
-      // Fallback to totals if no daily data
-      todayUsage = {
+    // Get all-time daily usage data
+    const allTimeData = await loadDailyUsageData({});
+
+    // Get session data
+    const sessionData = await loadSessionData({});
+
+    // Calculate totals for all-time data
+    const allTimeTotals = calculateTotals(allTimeData);
+    const allTimeTotalsObject = createTotalsObject(allTimeTotals);
+
+    // Calculate today's totals
+    let todayTotalTokens = 0;
+    let todayCost = 0;
+    let dailyUsage = null;
+
+    if (todayData.length > 0) {
+      const todayTotals = calculateTotals(todayData);
+      const todayTotalsObject = createTotalsObject(todayTotals);
+      todayTotalTokens = todayTotalsObject.totalTokens;
+      todayCost = todayTotalsObject.totalCost;
+
+      const todayEntry = todayData[0];
+      dailyUsage = {
         date: today,
-        inputTokens: data.totals.inputTokens || 0,
-        outputTokens: data.totals.outputTokens || 0,
-        cacheCreationTokens: data.totals.cacheCreationTokens,
-        cacheReadTokens: data.totals.cacheReadTokens,
-        totalTokens: data.totals.totalTokens || 0,
-        totalCost: data.totals.totalCost,
-        cost: data.totals.totalCost || 0,
+        inputTokens: todayEntry.inputTokens,
+        outputTokens: todayEntry.outputTokens,
+        totalTokens: todayTotalTokens,
+        cost: todayCost,
       };
     }
 
-    return todayUsage;
-  } catch {
-    return null;
+    // Process session data
+    const processedSessions = sessionData.slice(0, 10).map(
+      (session: SessionUsage): SessionData => ({
+        sessionId: session.sessionId || "",
+        projectPath: session.projectPath || "",
+        lastActivity: session.lastActivity || "",
+        inputTokens: session.inputTokens || 0,
+        outputTokens: session.outputTokens || 0,
+        totalTokens: (session.inputTokens || 0) + (session.outputTokens || 0),
+        totalCost: session.totalCost || 0,
+        cost: session.totalCost || 0,
+        model: "claude-sonnet-4-20250514", // ccusage doesn't provide model info, use default
+        projectName: session.projectPath?.split("/").pop() || "Unknown Project",
+      }),
+    );
+
+    return {
+      daily: dailyUsage,
+      total: {
+        inputTokens: allTimeTotalsObject.inputTokens || 0,
+        outputTokens: allTimeTotalsObject.outputTokens || 0,
+        totalTokens: allTimeTotalsObject.totalTokens,
+        cost: allTimeTotalsObject.totalCost,
+      },
+      sessions: processedSessions,
+      models: [],
+      lastUpdated: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error("Error fetching usage data:", error);
+    return {
+      daily: null,
+      total: null,
+      sessions: [],
+      models: [],
+      error: error instanceof Error ? error.message : String(error),
+      lastUpdated: new Date().toISOString(),
+    };
   }
+}
+
+export async function getDailyUsage(): Promise<DailyUsageData | null> {
+  const data = await getUserUsage();
+  return data.daily;
 }
 
 export async function getTotalUsage(): Promise<{
@@ -126,81 +174,13 @@ export async function getTotalUsage(): Promise<{
   totalTokens: number;
   cost: number;
 } | null> {
-  try {
-    const result = await executeCommand("--json");
-
-    if (!result.stdout.trim()) {
-      return null;
-    }
-
-    const data: CCUsageOutput = JSON.parse(result.stdout);
-
-    let totalUsage = null;
-
-    if (data.totals) {
-      totalUsage = {
-        inputTokens: data.totals.inputTokens || 0,
-        outputTokens: data.totals.outputTokens || 0,
-        totalTokens: data.totals.totalTokens || 0,
-        cost: data.totals.totalCost || 0,
-      };
-    } else {
-      // Fallback to legacy fields
-      totalUsage = {
-        inputTokens: data.inputTokens || 0,
-        outputTokens: data.outputTokens || 0,
-        totalTokens: data.totalTokens || 0,
-        cost: data.cost || 0,
-      };
-    }
-
-    return totalUsage;
-  } catch {
-    return null;
-  }
+  const data = await getUserUsage();
+  return data.total;
 }
 
 export async function getSessionUsage(): Promise<SessionData[]> {
-  try {
-    const result = await executeCommand("session --json");
-
-    if (!result.stdout.trim()) {
-      return [];
-    }
-
-    const data: CCUsageOutput = JSON.parse(result.stdout);
-
-    const sessions = data.sessions || [];
-
-    // Process sessions to add compatibility fields
-    const processedSessions = sessions.map((session) => ({
-      ...session,
-      cost: session.totalCost || session.cost || 0,
-      startTime: session.lastActivity,
-      model: session.model || "claude-3-5-sonnet-20241022", // Default model assumption
-      projectName: session.projectPath?.split("/").pop() || "Unknown Project",
-    }));
-
-    return processedSessions;
-  } catch {
-    return [];
-  }
-}
-
-export async function getUsageByPeriod(since: string, until?: string): Promise<CCUsageOutput | null> {
-  try {
-    const untilArg = until ? `--until ${until}` : "";
-    const result = await executeCommand(`--since ${since} ${untilArg} --json`);
-
-    if (!result.stdout.trim()) {
-      return null;
-    }
-
-    return JSON.parse(result.stdout);
-  } catch (error) {
-    console.error("Failed to get usage by period:", error);
-    return null;
-  }
+  const data = await getUserUsage();
+  return data.sessions;
 }
 
 export async function getAllUsageData(): Promise<UsageData> {
@@ -253,7 +233,7 @@ export async function checkccusageAvailable(): Promise<boolean> {
   try {
     // First ensure runtime is configured
     await ensureRuntimeConfigured();
-    
+
     // Then try to execute help command
     await executeCommand("--help");
     return true;

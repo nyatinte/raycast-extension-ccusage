@@ -179,7 +179,7 @@ export default function MenuBarccusage() {
               <MenuBarExtra.Item
                 key={session.sessionId || `${session.model}-${index}`}
                 title={DataFormatter.formatModelName(session.model)}
-                subtitle={`${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime)}`}
+                subtitle={`${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime || session.lastActivity)}`}
                 icon={
                   (session.model || "").includes("opus")
                     ? Icon.Crown

@@ -92,7 +92,7 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
           <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
             title={`Session ${index + 1}`}
-            text={`${DataFormatter.formatModelName(session.model)} • ${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime)}`}
+            text={`${DataFormatter.formatModelName(session.model)} • ${DataFormatter.formatTokens(session.totalTokens)} • ${DataFormatter.formatCost(session.cost)} • ${DataFormatter.formatRelativeTime(session.startTime || session.lastActivity)}`}
             icon={{ source: getSessionIcon(session), tintColor: getSessionIconColor(session) }}
           />
         ))}
