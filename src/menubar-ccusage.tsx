@@ -1,16 +1,11 @@
 import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
-import { 
-  useccusageAvailability, 
-  useDailyUsage, 
-  useMonthlyUsage, 
-  useTotalUsage 
-} from "./hooks/use-usage-data";
+import { useccusageAvailability, useDailyUsage, useMonthlyUsage, useTotalUsage } from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
 
 export default function MenuBarccusage() {
   // Check ccusage availability
   const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
-  
+
   // Get usage data (only when menu bar is displayed)
   const { data: dailyUsage, isLoading: dailyLoading } = useDailyUsage(0); // No refresh interval
   const { data: monthlyUsage, isLoading: monthlyLoading } = useMonthlyUsage();
@@ -70,12 +65,11 @@ export default function MenuBarccusage() {
 
   return (
     <MenuBarExtra icon={getMenuBarIcon()} tooltip={getTooltip()}>
-      
       <MenuBarExtra.Section title="Today's Usage">
         <MenuBarExtra.Item
           title="Daily Cost"
           subtitle={
-            dailyUsage 
+            dailyUsage
               ? `${formatCost(dailyUsage.cost)} • ${formatTokensAsMTok(dailyUsage.totalTokens)}`
               : "No usage today"
           }
@@ -87,7 +81,7 @@ export default function MenuBarccusage() {
         <MenuBarExtra.Item
           title="Monthly Cost"
           subtitle={
-            monthlyUsage 
+            monthlyUsage
               ? `${formatCost(monthlyUsage.cost)} • ${formatTokensAsMTok(monthlyUsage.totalTokens)}`
               : "No usage this month"
           }
@@ -99,7 +93,7 @@ export default function MenuBarccusage() {
         <MenuBarExtra.Item
           title="Total Cost"
           subtitle={
-            totalUsage 
+            totalUsage
               ? `${formatCost(totalUsage.cost)} • ${formatTokensAsMTok(totalUsage.totalTokens)}`
               : "No usage data"
           }
@@ -108,11 +102,7 @@ export default function MenuBarccusage() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Actions">
-        <MenuBarExtra.Item 
-          title="Open Claude Code" 
-          icon={Icon.Globe} 
-          onAction={() => open("https://claude.ai/code")} 
-        />
+        <MenuBarExtra.Item title="Open Claude Code" icon={Icon.Globe} onAction={() => open("https://claude.ai/code")} />
         <MenuBarExtra.Item
           title="Open Usage Monitor"
           icon={Icon.BarChart}

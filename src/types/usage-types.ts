@@ -48,14 +48,18 @@ export const MonthlyUsageDataSchema = z.object({
   totalCost: z.number(),
   cost: z.number(), // Alias for totalCost for compatibility
   modelsUsed: z.array(z.string()).optional(),
-  modelBreakdowns: z.array(z.object({
-    modelName: z.string(),
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number().optional(),
-    cacheReadTokens: z.number().optional(),
-    cost: z.number(),
-  })).optional(),
+  modelBreakdowns: z
+    .array(
+      z.object({
+        modelName: z.string(),
+        inputTokens: z.number(),
+        outputTokens: z.number(),
+        cacheCreationTokens: z.number().optional(),
+        cacheReadTokens: z.number().optional(),
+        cost: z.number(),
+      }),
+    )
+    .optional(),
 });
 
 export const TotalUsageSchema = z.object({

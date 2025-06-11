@@ -1,7 +1,14 @@
 import { useExec } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 import { cpus } from "os";
-import { UsageData, UsageStats, CCUsageOutput, DailyUsageData, MonthlyUsageData, SessionData } from "../types/usage-types";
+import {
+  UsageData,
+  UsageStats,
+  CCUsageOutput,
+  DailyUsageData,
+  MonthlyUsageData,
+  SessionData,
+} from "../types/usage-types";
 import { getRecentSessions } from "../utils/usage-calculator";
 
 function getEnhancedNodePaths(): string {
@@ -251,7 +258,12 @@ export function useUsageByPeriod(since: string, until?: string, refreshInterval:
 }
 
 export function useMonthlyUsage() {
-  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "monthly", "--json"], execOptions);
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    revalidate,
+  } = useExec("npx", ["ccusage@latest", "monthly", "--json"], execOptions);
 
   let data: MonthlyUsageData | null = null;
 
