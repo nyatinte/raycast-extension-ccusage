@@ -142,7 +142,7 @@ export default function MenuBarCCUsage() {
                   (session.model || "").includes("opus")
                     ? Icon.Crown
                     : (session.model || "").includes("sonnet")
-                      ? Icon.Sparkles
+                      ? Icon.Star
                       : (session.model || "").includes("haiku")
                         ? Icon.Leaf
                         : Icon.Message
@@ -168,7 +168,7 @@ export default function MenuBarCCUsage() {
                   (model.model || "").includes("opus")
                     ? Icon.Crown
                     : (model.model || "").includes("sonnet")
-                      ? Icon.Sparkles
+                      ? Icon.Star
                       : (model.model || "").includes("haiku")
                         ? Icon.Leaf
                         : Icon.Message

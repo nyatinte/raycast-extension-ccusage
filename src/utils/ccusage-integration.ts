@@ -24,21 +24,19 @@ export class CCUsageIntegration {
   static async executeCommand(args: string): Promise<CCUsageCommandResult> {
     try {
       const command = `${this.CCUSAGE_COMMAND} ${args}`;
-      
+
       const env = {
         ...process.env,
         PATH: this.getNodePaths(),
         // Ensure npm global packages are available
         NODE_PATH: `${process.env.HOME}/.npm-global/lib/node_modules:${process.env.NODE_PATH || ""}`,
       };
-      
 
       const { stdout, stderr } = await execAsync(command, {
         env,
         shell: "/bin/bash", // Use bash shell explicitly
       });
-      
-      
+
       return { stdout, stderr };
     } catch (error) {
       throw new Error(`Failed to execute ccusage command: ${error}`);
@@ -55,27 +53,27 @@ export class CCUsageIntegration {
       }
 
       const data: CCUsageOutput = JSON.parse(result.stdout);
-      
+
       // Get today's date
       const today = new Date().toISOString().split("T")[0];
-      
+
       // Find today's usage from daily array or use totals as fallback
       let todayUsage: DailyUsageData | null = null;
-      
+
       if (data.daily && data.daily.length > 0) {
         // Find today's entry in the daily array
-        const todayEntry = data.daily.find(d => d.date === today);
+        const todayEntry = data.daily.find((d) => d.date === today);
         if (todayEntry) {
           todayUsage = {
             ...todayEntry,
-            cost: todayEntry.totalCost || todayEntry.cost || 0
+            cost: todayEntry.totalCost || todayEntry.cost || 0,
           };
         } else {
           // Use the latest entry if today's entry not found
           const latest = data.daily[data.daily.length - 1];
           todayUsage = {
             ...latest,
-            cost: latest.totalCost || latest.cost || 0
+            cost: latest.totalCost || latest.cost || 0,
           };
         }
       } else if (data.totals) {
@@ -91,9 +89,9 @@ export class CCUsageIntegration {
           cost: data.totals.totalCost || 0,
         };
       }
-      
+
       return todayUsage;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -112,9 +110,9 @@ export class CCUsageIntegration {
       }
 
       const data: CCUsageOutput = JSON.parse(result.stdout);
-      
+
       let totalUsage = null;
-      
+
       if (data.totals) {
         totalUsage = {
           inputTokens: data.totals.inputTokens || 0,
@@ -131,9 +129,9 @@ export class CCUsageIntegration {
           cost: data.cost || 0,
         };
       }
-      
+
       return totalUsage;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -147,20 +145,20 @@ export class CCUsageIntegration {
       }
 
       const data: CCUsageOutput = JSON.parse(result.stdout);
-      
+
       const sessions = data.sessions || [];
-      
+
       // Process sessions to add compatibility fields
-      const processedSessions = sessions.map(session => ({
+      const processedSessions = sessions.map((session) => ({
         ...session,
         cost: session.totalCost || session.cost || 0,
         startTime: session.lastActivity,
         model: session.model || "claude-3-5-sonnet-20241022", // Default model assumption
-        projectName: session.projectPath?.split('/').pop() || 'Unknown Project'
+        projectName: session.projectPath?.split("/").pop() || "Unknown Project",
       }));
-      
+
       return processedSessions;
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -183,13 +181,11 @@ export class CCUsageIntegration {
 
   static async getAllUsageData(): Promise<UsageData> {
     try {
-      
       const [dailyUsage, totalUsage, sessions] = await Promise.all([
         this.getDailyUsage(),
         this.getTotalUsage(),
         this.getSessionUsage(),
       ]);
-
 
       // Group sessions by model for model breakdown
       const modelMap = new Map();
@@ -219,8 +215,7 @@ export class CCUsageIntegration {
         models: Array.from(modelMap.values()),
         lastUpdated: new Date().toISOString(),
       };
-      
-      
+
       return finalData;
     } catch (error) {
       return {

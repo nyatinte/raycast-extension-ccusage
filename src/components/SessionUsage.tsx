@@ -13,7 +13,7 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
   const getSessionIcon = (session: SessionData) => {
     const model = session.model || "";
     if (model.includes("opus")) return Icon.Crown;
-    if (model.includes("sonnet")) return Icon.Sparkles;
+    if (model.includes("sonnet")) return Icon.Star;
     if (model.includes("haiku")) return Icon.Leaf;
     return Icon.Message;
   };
@@ -24,24 +24,6 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
     if (model.includes("sonnet")) return Color.Blue;
     if (model.includes("haiku")) return Color.Green;
     return Color.SecondaryText;
-  };
-
-  const getAccessories = () => {
-    if (error) {
-      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
-    }
-
-    if (!sessions || sessions.length === 0) {
-      return [{ text: "No sessions", icon: Icon.Circle }];
-    }
-
-    const totalSessions = sessions.length;
-    const totalCost = sessions.reduce((sum, session) => sum + session.cost, 0);
-
-    return [
-      { text: `${totalSessions} sessions`, icon: Icon.List },
-      { text: DataFormatter.formatCost(totalCost), icon: Icon.Coins },
-    ];
   };
 
   const getDetailMetadata = () => {
@@ -121,9 +103,7 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
     <List.Item
       id="sessions"
       title="Sessions"
-      subtitle={sessions && sessions.length > 0 ? `${sessions.length} sessions` : "No sessions"}
       icon={Icon.List}
-      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>

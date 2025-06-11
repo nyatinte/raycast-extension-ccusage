@@ -4,6 +4,8 @@
 
 "Always update the CLAUDE.md file appropriately to reflect the instruction content when there are instructions like 'In the project, please do ○○.'"
 
+dont npm run dev. this command is only for users who are developing the extension.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview

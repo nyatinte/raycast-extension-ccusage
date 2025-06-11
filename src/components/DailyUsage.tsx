@@ -46,7 +46,6 @@ export default function DailyUsage({ dailyUsage, isLoading, error }: DailyUsageP
     }
   };
 
-
   const getDetailMetadata = () => {
     if (error) {
       return (

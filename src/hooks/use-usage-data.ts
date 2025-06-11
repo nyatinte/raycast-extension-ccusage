@@ -4,7 +4,7 @@ import { CCUsageIntegration } from "../utils/ccusage-integration";
 import { UsageData, UsageStats } from "../types/usage-types";
 import { UsageCalculator } from "../utils/usage-calculator";
 
-export function useUsageData(refreshInterval: number = 5000) {
+export function useUsageData() {
   const { data, isLoading, error, revalidate } = usePromise<UsageData>(
     async () => {
       return CCUsageIntegration.getAllUsageData();
@@ -21,15 +21,10 @@ export function useUsageData(refreshInterval: number = 5000) {
     },
   );
 
-  // Disable automatic refresh - data is fetched once on mount
-  // useInterval(() => {
-  //   revalidate();
-  // }, refreshInterval);
-
   return {
     data,
     isLoading,
-    error: error || data?.error,
+    error,
     revalidate,
   };
 }
@@ -71,12 +66,9 @@ export function useSessionUsage(refreshInterval: number = 15000) {
 }
 
 export function useUsageStats(refreshInterval: number = 5000): UsageStats & { revalidate: () => void } {
-  const { data, isLoading, error, revalidate } = usePromise(
-    async () => {
-      return await CCUsageIntegration.getAllUsageData();
-    },
-    []
-  );
+  const { data, isLoading, error, revalidate } = usePromise(async () => {
+    return await CCUsageIntegration.getAllUsageData();
+  }, []);
 
   // Enable automatic refresh only for MenuBar (1000ms interval), disable for main view
   if (refreshInterval <= 1000) {
@@ -93,7 +85,6 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
     isLoading,
     error: error?.message || (data as unknown as { error?: string })?.error,
   };
-
 
   return {
     ...stats,

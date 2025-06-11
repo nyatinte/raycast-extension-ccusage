@@ -28,21 +28,6 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
     return Color.Red;
   };
 
-  const getAccessories = () => {
-    if (error) {
-      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
-    }
-
-    if (!totalUsage) {
-      return [{ text: "No cost data", icon: Icon.Circle }];
-    }
-
-    return [
-      { text: DataFormatter.formatCost(totalUsage.cost), icon: Icon.Coins },
-      { text: `${models.length} models`, icon: Icon.BarChart },
-    ];
-  };
-
   const getDetailMetadata = () => {
     if (error) {
       return (
@@ -127,7 +112,7 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
               (model.model || "").includes("opus")
                 ? Icon.Crown
                 : (model.model || "").includes("sonnet")
-                  ? Icon.Sparkles
+                  ? Icon.Star
                   : (model.model || "").includes("haiku")
                     ? Icon.Leaf
                     : Icon.Message
@@ -159,9 +144,7 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
     <List.Item
       id="cost-analysis"
       title="Costs"
-      subtitle={totalUsage ? `Total: ${DataFormatter.formatCost(totalUsage.cost)}` : "No cost data"}
       icon={{ source: getCostIcon(mainCost), tintColor: getCostColor(mainCost) }}
-      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>

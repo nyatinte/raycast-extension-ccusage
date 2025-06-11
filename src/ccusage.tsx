@@ -23,7 +23,6 @@ export default function CCUsage() {
       <List>
         <List.Item
           title="ccusage not available"
-          subtitle="Please install ccusage to monitor Claude Code usage"
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>

@@ -79,6 +79,10 @@ export class DataFormatter {
     if (!model) return "Unknown Model";
 
     const modelNames: Record<string, string> = {
+      "claude-opus-4-20250514": "Claude Opus 4",
+      "claude-opus-4-0": "Claude Opus 4",
+      "claude-sonnet-4-20250514": "Claude Sonnet 4",
+      "claude-sonnet-4-0": "Claude Sonnet 4",
       "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
       "claude-3-5-sonnet-20240620": "Claude 3.5 Sonnet (Legacy)",
       "claude-3-opus-20240229": "Claude 3 Opus",

@@ -14,7 +14,7 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
   const getModelIcon = (model: string) => {
     const modelName = model || "";
     if (modelName.includes("opus")) return Icon.Crown;
-    if (modelName.includes("sonnet")) return Icon.Sparkles;
+    if (modelName.includes("sonnet")) return Icon.Star;
     if (modelName.includes("haiku")) return Icon.Leaf;
     return Icon.Message;
   };
@@ -33,25 +33,6 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
     if (modelName.includes("sonnet")) return "Standard";
     if (modelName.includes("haiku")) return "Fast";
     return "Unknown";
-  };
-
-  const getAccessories = () => {
-    if (error) {
-      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
-    }
-
-    if (!models || models.length === 0) {
-      return [{ text: "No models", icon: Icon.Circle }];
-    }
-
-    const totalCost = models.reduce((sum, model) => sum + model.cost, 0);
-    const totalSessions = models.reduce((sum, model) => sum + model.sessionCount, 0);
-
-    return [
-      { text: `${models.length} models`, icon: Icon.BarChart },
-      { text: `${totalSessions} sessions`, icon: Icon.List },
-      { text: DataFormatter.formatCost(totalCost), icon: Icon.Coins },
-    ];
   };
 
   const getDetailMetadata = () => {
@@ -190,9 +171,7 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
     <List.Item
       id="model-breakdown"
       title="Models"
-      subtitle={models && models.length > 0 ? `${models.length} models used` : "No model data"}
       icon={Icon.BarChart}
-      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
