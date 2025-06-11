@@ -119,3 +119,8 @@ The extension requires the `ccusage` npm package to be available via `npx ccusag
 - **TypeScript**: Maintain strict typing throughout the codebase
 - **Error Handling**: Gracefully handle null/undefined states in UI components
 - **Performance**: Use selective refresh intervals based on component requirements
+
+### Documentation Guidelines
+
+- **README Language**: Always write README.md in English (not Japanese)
+- **Code Comments**: Use English for all code comments and documentation
