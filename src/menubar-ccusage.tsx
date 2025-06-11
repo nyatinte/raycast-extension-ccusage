@@ -1,19 +1,61 @@
 import { MenuBarExtra, Icon, Color, open } from "@raycast/api";
-import { useUsageStats, useCCUsageAvailability } from "./hooks/use-usage-data";
+import { useEffect, useState } from "react";
+import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
+import { isInitialized, hasValidRuntimeConfig } from "./utils/runtime-settings";
 import { DataFormatter } from "./utils/data-formatter";
 import { UsageCalculator } from "./utils/usage-calculator";
 
-export default function MenuBarCCUsage() {
-  const { isAvailable, isLoading: availabilityLoading } = useCCUsageAvailability();
+export default function MenuBarccusage() {
+  const [initialized, setInitialized] = useState(false);
+  const [hasValidConfig, setHasValidConfig] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // All hooks must be called at the top level
+  const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
   const stats = useUsageStats(1000); // 1 second refresh for menu bar
 
-  if (availabilityLoading || stats.isLoading) {
+  useEffect(() => {
+    const checkInit = async () => {
+      try {
+        const [initResult, configResult] = await Promise.all([
+          isInitialized(),
+          hasValidRuntimeConfig()
+        ]);
+        setInitialized(initResult);
+        setHasValidConfig(configResult);
+      } catch (error) {
+        console.error("Failed to check initialization:", error);
+        setInitialized(false);
+        setHasValidConfig(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkInit();
+  }, []);
+
+  if (availabilityLoading || stats.isLoading || isLoading) {
     return (
       <MenuBarExtra
         icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
         tooltip="Loading Claude usage..."
         isLoading={true}
       />
+    );
+  }
+
+  // 初回設定が必要な場合
+  if (!initialized || !hasValidConfig) {
+    return (
+      <MenuBarExtra
+        icon={{ source: Icon.Gear, tintColor: Color.Orange }}
+        tooltip="Setup required for Claude usage monitoring"
+      >
+        <MenuBarExtra.Item
+          title="Setup Required"
+          onAction={() => open("raycast://extensions/raycast/ccusage/ccusage")}
+        />
+      </MenuBarExtra>
     );
   }
 
