@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color, ReactNode } from "@raycast/api";
 import { DailyUsageData, ModelUsage } from "../types/usage-types";
 import { DataFormatter } from "../utils/data-formatter";
 import { UsageCalculator } from "../utils/usage-calculator";
@@ -9,9 +9,10 @@ interface CostAnalysisProps {
   models: ModelUsage[];
   isLoading: boolean;
   error?: string;
+  settingsActions?: ReactNode;
 }
 
-export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error }: CostAnalysisProps) {
+export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error, settingsActions }: CostAnalysisProps) {
   const getCostIcon = (cost: number) => {
     if (cost === 0) return Icon.Circle;
     if (cost < 1) return Icon.Coins;
@@ -161,6 +162,7 @@ export default function CostAnalysis({ totalUsage, dailyUsage, models, isLoading
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {settingsActions}
           <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
           <Action.OpenInBrowser
             title="Usage Guidelines"

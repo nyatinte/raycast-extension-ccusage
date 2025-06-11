@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color, ReactNode } from "@raycast/api";
 import { SessionData } from "../types/usage-types";
 import { DataFormatter } from "../utils/data-formatter";
 import { UsageCalculator } from "../utils/usage-calculator";
@@ -7,9 +7,10 @@ interface SessionUsageProps {
   sessions: SessionData[];
   isLoading: boolean;
   error?: string;
+  settingsActions?: ReactNode;
 }
 
-export default function SessionUsage({ sessions, isLoading, error }: SessionUsageProps) {
+export default function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
   const getSessionIcon = (session: SessionData) => {
     const model = session.model || "";
     if (model.includes("opus")) return Icon.Crown;
@@ -107,6 +108,7 @@ export default function SessionUsage({ sessions, isLoading, error }: SessionUsag
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {settingsActions}
           <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
           <Action.OpenInBrowser title="View Session Data" url="https://claude.ai/code" icon={Icon.Clock} />
         </ActionPanel>

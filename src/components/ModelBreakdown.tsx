@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
 import { DataFormatter } from "../utils/data-formatter";
@@ -8,9 +8,10 @@ interface ModelBreakdownProps {
   models: ModelUsage[];
   isLoading: boolean;
   error?: string;
+  settingsActions?: ReactNode;
 }
 
-export default function ModelBreakdown({ models, isLoading, error }: ModelBreakdownProps) {
+export default function ModelBreakdown({ models, isLoading, error, settingsActions }: ModelBreakdownProps) {
   const getModelIcon = (model: string) => {
     const modelName = model || "";
     if (modelName.includes("opus")) return Icon.Crown;
@@ -175,6 +176,7 @@ export default function ModelBreakdown({ models, isLoading, error }: ModelBreakd
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {settingsActions}
           <Action.OpenInBrowser
             title="Claude Model Comparison"
             url="https://docs.anthropic.com/claude/docs/models-overview"
