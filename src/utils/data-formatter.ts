@@ -16,6 +16,13 @@ export const formatTokens = (tokens: number | null | undefined): string => {
     .otherwise((t) => `${(t / 1000000).toFixed(1)}M`);
 };
 
+export const formatTokensAsMTok = (tokens: number | null | undefined): string => {
+  if (tokens === null || tokens === undefined) return "0 MTok";
+
+  const mTokens = tokens / 1000000;
+  return `${mTokens.toFixed(1)} MTok`;
+};
+
 export const formatCost = (cost: number | null | undefined): string => {
   if (cost === null || cost === undefined) return "$0.00";
 
