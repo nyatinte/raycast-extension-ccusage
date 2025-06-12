@@ -146,6 +146,9 @@ src/
 - **Type over Interface**: Prefer `type` aliases over `interface` declarations
 - **Pure Functions**: Avoid side effects in utility functions
 - **Functional Patterns**: Use `ts-pattern` for complex conditional logic
+- **Type Annotations**: Always provide type annotations for function parameters and return values
+- **Concise Logic**: Keep calculation logic simple and readable
+- **Utility Libraries**: Use es-toolkit (lodash alternative) for aggregation and data processing
 
 ### Git Workflow
 
