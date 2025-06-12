@@ -45,6 +45,9 @@ npm run lint
 # Auto-fix linting issues
 npm run fix-lint
 
+# Check for unused dependencies and exports
+npm run knip
+
 # Publish to Raycast Store
 npm run publish
 ```
@@ -186,4 +189,6 @@ The extension includes a runtime settings system that allows users to configure 
 - **Zod Validation**: Runtime type checking for external data
 - **ESLint Configuration**: Follow Raycast's official ESLint config
 - **Prettier Formatting**: Consistent code formatting
+- **Dependency Management**: Use knip to detect unused dependencies and exports
+- **Pre-commit Check**: Run `npm run knip` before committing to ensure clean codebase
 - **No Debug Code**: Remove console.log statements before commits
