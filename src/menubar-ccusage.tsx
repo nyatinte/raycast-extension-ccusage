@@ -1,22 +1,144 @@
 import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
-import { 
-  useccusageAvailability, 
-  useMenuBarDailyUsage, 
-  useMenuBarMonthlyUsage, 
-  useMenuBarTotalUsage 
-} from "./hooks/use-usage-data";
+import { usePromise } from "@raycast/utils";
+import { useccusageAvailability } from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
+import { execSync } from "child_process";
+import { cpus } from "os";
+
+function getEnhancedNodePaths(): string {
+  const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
+
+  const platformPaths = isAppleSilicon
+    ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
+    : ["/usr/local/bin", "/usr/local/lib/node_modules/.bin"];
+
+  const versionManagerPaths = [
+    `${process.env.HOME}/.nvm/versions/node/*/bin`,
+    `${process.env.HOME}/.fnm/node-versions/*/installation/bin`,
+    `${process.env.HOME}/.n/bin`,
+    `${process.env.HOME}/.volta/bin`,
+  ];
+
+  const systemPaths = ["/usr/bin", "/bin", `${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`];
+
+  const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
+
+  return allPaths.filter((path) => path).join(":");
+}
 
 export default function MenuBarccusage() {
   // Check ccusage availability
   const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
 
-  // Get usage data (only when menu bar is displayed, no auto-refresh)
-  const { data: dailyUsage, isLoading: dailyLoading } = useMenuBarDailyUsage();
-  const { data: monthlyUsage, isLoading: monthlyLoading } = useMenuBarMonthlyUsage();
-  const { data: totalUsage, isLoading: totalLoading } = useMenuBarTotalUsage();
+  // Get usage data with usePromise (system-monitor style)
+  const { data: usageData, isLoading: usageLoading } = usePromise(async () => {
+    if (!isAvailable) return null;
 
-  const isLoading = availabilityLoading || dailyLoading || monthlyLoading || totalLoading;
+    try {
+      const enhancedPath = getEnhancedNodePaths();
+      
+      // Get daily, monthly, and total usage
+      const [dailyResult, monthlyResult, totalResult] = await Promise.all([
+        new Promise<string>((resolve, reject) => {
+          try {
+            const result = execSync("npx ccusage@latest daily --json", {
+              env: { ...process.env, PATH: enhancedPath },
+              encoding: "utf8",
+              timeout: 30000,
+            });
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        }),
+        new Promise<string>((resolve, reject) => {
+          try {
+            const result = execSync("npx ccusage@latest monthly --json", {
+              env: { ...process.env, PATH: enhancedPath },
+              encoding: "utf8", 
+              timeout: 30000,
+            });
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        }),
+        new Promise<string>((resolve, reject) => {
+          try {
+            const result = execSync("npx ccusage@latest --json", {
+              env: { ...process.env, PATH: enhancedPath },
+              encoding: "utf8",
+              timeout: 30000,
+            });
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        }),
+      ]);
+
+      // Parse results
+      const dailyData = JSON.parse(dailyResult);
+      const monthlyData = JSON.parse(monthlyResult);
+      const totalData = JSON.parse(totalResult);
+
+      // Process daily usage
+      let dailyUsage = null;
+      if (dailyData.daily && dailyData.daily.length > 0) {
+        const today = new Date().toISOString().split("T")[0];
+        const todayEntry = dailyData.daily.find((d: any) => d.date === today);
+        if (todayEntry) {
+          dailyUsage = {
+            ...todayEntry,
+            cost: todayEntry.totalCost || todayEntry.cost || 0,
+          };
+        } else {
+          const latest = dailyData.daily[dailyData.daily.length - 1];
+          dailyUsage = {
+            ...latest,
+            cost: latest.totalCost || latest.cost || 0,
+          };
+        }
+      }
+
+      // Process monthly usage
+      let monthlyUsage = null;
+      if (monthlyData.monthly && monthlyData.monthly.length > 0) {
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const currentMonthEntry = monthlyData.monthly.find((m: any) => m.month === currentMonth);
+        if (currentMonthEntry) {
+          monthlyUsage = {
+            ...currentMonthEntry,
+            cost: currentMonthEntry.totalCost || 0,
+          };
+        } else {
+          const latest = monthlyData.monthly[monthlyData.monthly.length - 1];
+          monthlyUsage = {
+            ...latest,
+            cost: latest.totalCost || 0,
+          };
+        }
+      }
+
+      // Process total usage
+      let totalUsage = null;
+      if (totalData.totals) {
+        totalUsage = {
+          inputTokens: totalData.totals.inputTokens || 0,
+          outputTokens: totalData.totals.outputTokens || 0,
+          totalTokens: totalData.totals.totalTokens || 0,
+          cost: totalData.totals.totalCost || 0,
+        };
+      }
+
+      return { dailyUsage, monthlyUsage, totalUsage };
+    } catch (error) {
+      console.error("Failed to fetch usage data:", error);
+      return null;
+    }
+  });
+
+  const isLoading = availabilityLoading || usageLoading;
 
   if (isLoading) {
     return (
@@ -49,12 +171,12 @@ export default function MenuBarccusage() {
 
   // Calculate menu bar icon based on daily usage
   const getMenuBarIcon = () => {
-    if (!dailyUsage) {
+    if (!usageData?.dailyUsage) {
       return { source: Icon.Coins, tintColor: Color.SecondaryText };
     }
 
     // Use cost-based intensity
-    const cost = dailyUsage.cost || 0;
+    const cost = usageData.dailyUsage.cost || 0;
     if (cost < 1) return { source: Icon.Coins, tintColor: Color.Green };
     if (cost < 5) return { source: Icon.Coins, tintColor: Color.Yellow };
     if (cost < 10) return { source: Icon.Coins, tintColor: Color.Orange };
@@ -62,10 +184,10 @@ export default function MenuBarccusage() {
   };
 
   const getTooltip = () => {
-    if (!dailyUsage) {
+    if (!usageData?.dailyUsage) {
       return "No Claude usage today";
     }
-    return `Today: ${formatCost(dailyUsage.cost)} • ${formatTokensAsMTok(dailyUsage.totalTokens)}`;
+    return `Today: ${formatCost(usageData.dailyUsage.cost)} • ${formatTokensAsMTok(usageData.dailyUsage.totalTokens)}`;
   };
 
   return (
@@ -74,8 +196,8 @@ export default function MenuBarccusage() {
         <MenuBarExtra.Item
           title="Daily Cost"
           subtitle={
-            dailyUsage
-              ? `${formatCost(dailyUsage.cost)} • ${formatTokensAsMTok(dailyUsage.totalTokens)}`
+            usageData?.dailyUsage
+              ? `${formatCost(usageData.dailyUsage.cost)} • ${formatTokensAsMTok(usageData.dailyUsage.totalTokens)}`
               : "No usage today"
           }
           icon={Icon.Calendar}
@@ -86,8 +208,8 @@ export default function MenuBarccusage() {
         <MenuBarExtra.Item
           title="Monthly Cost"
           subtitle={
-            monthlyUsage
-              ? `${formatCost(monthlyUsage.cost)} • ${formatTokensAsMTok(monthlyUsage.totalTokens)}`
+            usageData?.monthlyUsage
+              ? `${formatCost(usageData.monthlyUsage.cost)} • ${formatTokensAsMTok(usageData.monthlyUsage.totalTokens)}`
               : "No usage this month"
           }
           icon={Icon.BarChart}
@@ -98,8 +220,8 @@ export default function MenuBarccusage() {
         <MenuBarExtra.Item
           title="Total Cost"
           subtitle={
-            totalUsage
-              ? `${formatCost(totalUsage.cost)} • ${formatTokensAsMTok(totalUsage.totalTokens)}`
+            usageData?.totalUsage
+              ? `${formatCost(usageData.totalUsage.cost)} • ${formatTokensAsMTok(usageData.totalUsage.totalTokens)}`
               : "No usage data"
           }
           icon={Icon.Coins}
