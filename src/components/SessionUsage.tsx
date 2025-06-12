@@ -7,6 +7,7 @@ import {
   calculateAverageSessionTokens,
   calculateEfficiencyMetrics,
 } from "../utils/usage-calculator";
+import { getModelIcon, getModelIconColor } from "../utils/model-utils";
 
 type SessionUsageProps = {
   sessions: SessionData[];
@@ -16,21 +17,6 @@ type SessionUsageProps = {
 };
 
 export default function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
-  const getSessionIcon = (session: SessionData) => {
-    const model = session.model || "";
-    if (model.includes("opus")) return Icon.Crown;
-    if (model.includes("sonnet")) return Icon.Star;
-    if (model.includes("haiku")) return Icon.Leaf;
-    return Icon.Message;
-  };
-
-  const getSessionIconColor = (session: SessionData) => {
-    const model = session.model || "";
-    if (model.includes("opus")) return Color.Purple;
-    if (model.includes("sonnet")) return Color.Blue;
-    if (model.includes("haiku")) return Color.Green;
-    return Color.SecondaryText;
-  };
 
   const getDetailMetadata = () => {
     if (error) {
@@ -92,7 +78,7 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
             key={session.sessionId || index}
             title={`Session ${index + 1}`}
             text={`${formatModelName(session.model)} • ${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTime(session.startTime || session.lastActivity)}`}
-            icon={{ source: getSessionIcon(session), tintColor: getSessionIconColor(session) }}
+            icon={{ source: getModelIcon(session.model || ""), tintColor: getModelIconColor(session.model || "") }}
           />
         ))}
       </List.Item.Detail.Metadata>

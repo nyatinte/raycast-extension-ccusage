@@ -1,8 +1,9 @@
 import React, { ReactNode } from "react";
-import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
 import { formatTokens, formatCost, formatModelName, getCostPerMTok } from "../utils/data-formatter";
 import { getTopModels } from "../utils/usage-calculator";
+import { getModelIcon, getModelIconColor, getModelTier, groupModelsByTier } from "../utils/model-utils";
 
 type ModelBreakdownProps = {
   models: ModelUsage[];
@@ -12,29 +13,6 @@ type ModelBreakdownProps = {
 };
 
 export default function ModelBreakdown({ models, isLoading, error, settingsActions }: ModelBreakdownProps) {
-  const getModelIcon = (model: string) => {
-    const modelName = model || "";
-    if (modelName.includes("opus")) return Icon.Crown;
-    if (modelName.includes("sonnet")) return Icon.Star;
-    if (modelName.includes("haiku")) return Icon.Leaf;
-    return Icon.Message;
-  };
-
-  const getModelIconColor = (model: string) => {
-    const modelName = model || "";
-    if (modelName.includes("opus")) return Color.Purple;
-    if (modelName.includes("sonnet")) return Color.Blue;
-    if (modelName.includes("haiku")) return Color.Green;
-    return Color.SecondaryText;
-  };
-
-  const getModelTier = (model: string): "Premium" | "Standard" | "Fast" | "Unknown" => {
-    const modelName = model || "";
-    if (modelName.includes("opus")) return "Premium";
-    if (modelName.includes("sonnet")) return "Standard";
-    if (modelName.includes("haiku")) return "Fast";
-    return "Unknown";
-  };
 
   const getDetailMetadata = () => {
     if (error) {
@@ -73,15 +51,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
     }, models[0] || null);
 
     // Group models by tier
-    const modelsByTier = models.reduce(
-      (acc, model) => {
-        const tier = getModelTier(model.model);
-        if (!acc[tier]) acc[tier] = [];
-        acc[tier].push(model);
-        return acc;
-      },
-      {} as Record<string, ModelUsage[]>,
-    );
+    const modelsByTier = groupModelsByTier(models);
 
     return (
       <List.Item.Detail.Metadata>

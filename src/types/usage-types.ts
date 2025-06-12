@@ -132,26 +132,7 @@ export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
 export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
 export type SessionData = z.infer<typeof SessionDataSchema>;
 export type ModelUsage = z.infer<typeof ModelUsageSchema>;
-export type TotalUsage = z.infer<typeof TotalUsageSchema>;
 export type UsageData = z.infer<typeof UsageDataSchema>;
 export type CCUsageCommandResult = z.infer<typeof CCUsageCommandResultSchema>;
 export type CCUsageOutput = z.infer<typeof CCUsageOutputSchema>;
 export type UsageStats = z.infer<typeof UsageStatsSchema>;
-
-// Validation helpers
-export const validateDailyUsage = (data: unknown): DailyUsageData | null => {
-  const result = DailyUsageDataSchema.safeParse(data);
-  return result.success ? result.data : null;
-};
-
-export const validateCCUsageOutput = (data: unknown): CCUsageOutput | null => {
-  const result = CCUsageOutputSchema.safeParse(data);
-  return result.success ? result.data : null;
-};
-
-export const validateSessionData = (data: unknown[]): SessionData[] => {
-  return data
-    .map((item) => SessionDataSchema.safeParse(item))
-    .filter((result) => result.success)
-    .map((result) => result.data as SessionData);
-};

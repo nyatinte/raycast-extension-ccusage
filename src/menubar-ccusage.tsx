@@ -2,29 +2,8 @@ import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@rayc
 import { usePromise } from "@raycast/utils";
 import { useccusageAvailability } from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
+import { getEnhancedNodePaths, getCostBasedIcon, processUsageData } from "./utils/ccusage-common";
 import { execSync } from "child_process";
-import { cpus } from "os";
-
-function getEnhancedNodePaths(): string {
-  const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
-
-  const platformPaths = isAppleSilicon
-    ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
-    : ["/usr/local/bin", "/usr/local/lib/node_modules/.bin"];
-
-  const versionManagerPaths = [
-    `${process.env.HOME}/.nvm/versions/node/*/bin`,
-    `${process.env.HOME}/.fnm/node-versions/*/installation/bin`,
-    `${process.env.HOME}/.n/bin`,
-    `${process.env.HOME}/.volta/bin`,
-  ];
-
-  const systemPaths = ["/usr/bin", "/bin", `${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`];
-
-  const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
-
-  return allPaths.filter((path) => path).join(":");
-}
 
 export default function MenuBarccusage() {
   // Check ccusage availability
@@ -77,59 +56,14 @@ export default function MenuBarccusage() {
         }),
       ]);
 
-      // Parse results
+      // Parse and process results using common utility functions
       const dailyData = JSON.parse(dailyResult);
       const monthlyData = JSON.parse(monthlyResult);
       const totalData = JSON.parse(totalResult);
 
-      // Process daily usage
-      let dailyUsage = null;
-      if (dailyData.daily && dailyData.daily.length > 0) {
-        const today = new Date().toISOString().split("T")[0];
-        const todayEntry = dailyData.daily.find((d: { date: string }) => d.date === today);
-        if (todayEntry) {
-          dailyUsage = {
-            ...todayEntry,
-            cost: todayEntry.totalCost || todayEntry.cost || 0,
-          };
-        } else {
-          const latest = dailyData.daily[dailyData.daily.length - 1];
-          dailyUsage = {
-            ...latest,
-            cost: latest.totalCost || latest.cost || 0,
-          };
-        }
-      }
-
-      // Process monthly usage
-      let monthlyUsage = null;
-      if (monthlyData.monthly && monthlyData.monthly.length > 0) {
-        const currentMonth = new Date().toISOString().slice(0, 7);
-        const currentMonthEntry = monthlyData.monthly.find((m: { month: string }) => m.month === currentMonth);
-        if (currentMonthEntry) {
-          monthlyUsage = {
-            ...currentMonthEntry,
-            cost: currentMonthEntry.totalCost || 0,
-          };
-        } else {
-          const latest = monthlyData.monthly[monthlyData.monthly.length - 1];
-          monthlyUsage = {
-            ...latest,
-            cost: latest.totalCost || 0,
-          };
-        }
-      }
-
-      // Process total usage
-      let totalUsage = null;
-      if (totalData.totals) {
-        totalUsage = {
-          inputTokens: totalData.totals.inputTokens || 0,
-          outputTokens: totalData.totals.outputTokens || 0,
-          totalTokens: totalData.totals.totalTokens || 0,
-          cost: totalData.totals.totalCost || 0,
-        };
-      }
+      const dailyUsage = processUsageData(dailyData, "daily");
+      const monthlyUsage = processUsageData(monthlyData, "monthly");
+      const totalUsage = processUsageData(totalData, "total");
 
       return { dailyUsage, monthlyUsage, totalUsage };
     } catch (error) {
@@ -175,12 +109,9 @@ export default function MenuBarccusage() {
       return { source: Icon.Coins, tintColor: Color.SecondaryText };
     }
 
-    // Use cost-based intensity
     const cost = usageData.dailyUsage.cost || 0;
-    if (cost < 1) return { source: Icon.Coins, tintColor: Color.Green };
-    if (cost < 5) return { source: Icon.Coins, tintColor: Color.Yellow };
-    if (cost < 10) return { source: Icon.Coins, tintColor: Color.Orange };
-    return { source: Icon.Coins, tintColor: Color.Red };
+    const colorConfig = getCostBasedIcon(cost);
+    return { source: Icon.Coins, tintColor: Color[colorConfig.tintColor] };
   };
 
   const getTooltip = () => {

@@ -29,10 +29,22 @@
       "description": "Choose the runtime to execute ccusage commands",
       "default": "npx",
       "data": [
-        {"title": "npx (Node Package Execute)", "value": "npx"},
-        {"title": "bunx (Bun Package Execute)", "value": "bunx"},
-        {"title": "pnpm dlx (PNPM Package Execute)", "value": "pnpm"},
-        {"title": "deno run (Deno Runtime)", "value": "deno"}
+        {
+          "title": "npx (Node Package Execute)",
+          "value": "npx"
+        },
+        {
+          "title": "bunx (Bun Package Execute)",
+          "value": "bunx"
+        },
+        {
+          "title": "pnpm dlx (PNPM Package Execute)",
+          "value": "pnpm"
+        },
+        {
+          "title": "deno run (Deno Runtime)",
+          "value": "deno"
+        }
       ]
     },
     {
@@ -49,6 +61,7 @@
     "@raycast/utils": "^1.17.0",
     "ccusage": "^0.6.2",
     "date-fns": "^4.1.0",
+    "es-toolkit": "^1.39.3",
     "ts-pattern": "^5.7.1",
     "usehooks-ts": "^3.1.0",
     "zod": "^3.25.61"

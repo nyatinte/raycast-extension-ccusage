@@ -1,3 +1,4 @@
+// TODO: USE date-fns for date formatting
 import { format, formatDistanceToNow, isValid, parseISO } from "date-fns";
 import { match } from "ts-pattern";
 
@@ -49,6 +50,9 @@ export const formatRelativeTime = (dateString: string): string => {
   return isValid(date) ? formatDistanceToNow(date, { addSuffix: true }) : dateString;
 };
 
+/**
+ * @see https://docs.anthropic.com/en/docs/about-claude/models/overview#model-names
+ */
 export const formatModelName = (model: string | null | undefined): string => {
   if (!model) return "Unknown Model";
 

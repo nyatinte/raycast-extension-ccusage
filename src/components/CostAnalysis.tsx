@@ -2,6 +2,7 @@ import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { ReactNode } from "react";
 import { DailyUsageData, ModelUsage } from "../types/usage-types";
 import { formatTokens, formatCost, getCostPerMTok, formatModelName } from "../utils/data-formatter";
+import { getModelIcon } from "../utils/model-utils";
 
 type CostAnalysisProps = {
   totalUsage: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null;
@@ -131,15 +132,7 @@ export default function CostAnalysis({
             key={`cost-${model.model || "unknown"}-${index}`}
             title={formatModelName(model.model)}
             text={`${formatCost(model.cost)} (${model.percentage})`}
-            icon={
-              (model.model || "").includes("opus")
-                ? Icon.Crown
-                : (model.model || "").includes("sonnet")
-                  ? Icon.Star
-                  : (model.model || "").includes("haiku")
-                    ? Icon.Leaf
-                    : Icon.Message
-            }
+            icon={getModelIcon(model.model || "")}
           />
         ))}
 
