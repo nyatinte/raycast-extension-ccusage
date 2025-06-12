@@ -143,7 +143,6 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
             />
           )}
           {settingsActions}
-          <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
           <Action.OpenInBrowser
             title="View Ccusage Repository"
             url="https://github.com/ryoppippi/ccusage"

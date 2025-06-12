@@ -166,7 +166,6 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
             icon={Icon.Book}
           />
           <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
-          <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
         </ActionPanel>
       }
     />

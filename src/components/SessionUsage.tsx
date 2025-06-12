@@ -117,7 +117,6 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
             />
           )}
           {settingsActions}
-          <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
           <Action.OpenInBrowser title="View Session Data" url="https://claude.ai/code" icon={Icon.Clock} />
         </ActionPanel>
       }

@@ -196,7 +196,6 @@ export default function CostAnalysis({
             url="https://docs.anthropic.com/claude/docs/usage-guidelines"
             icon={Icon.Book}
           />
-          <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
         </ActionPanel>
       }
     />
