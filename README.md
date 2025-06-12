@@ -37,6 +37,8 @@ If you encounter any problems or bugs, please create an issue in this repository
 
 The Raycast layout of this extension was inspired by the [System Monitor](https://www.raycast.com/hossammourad/raycast-system-monitor) extension.
 
+Special thanks to [@ryoppippi](https://github.com/ryoppippi) for creating the [ccusage](https://github.com/ryoppippi/ccusage) tool that makes this extension possible.
+
 ## License
 
 MIT
