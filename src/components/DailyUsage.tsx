@@ -128,7 +128,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
   return (
     <List.Item
       id="daily"
-      title={dailyUsage ? `Today (${formatDateWithTimezone(dailyUsage.date, preferences.timezone)})` : "Today"}
+      title="Today"
       icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
       accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
