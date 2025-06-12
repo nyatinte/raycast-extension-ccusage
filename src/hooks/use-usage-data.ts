@@ -295,3 +295,96 @@ export function useMonthlyUsage() {
 
   return { data, isLoading, error, revalidate };
 }
+
+// MenuBar専用フック - useIntervalを使わない
+export function useMenuBarDailyUsage() {
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "daily", "--json"], execOptions);
+
+  let data: DailyUsageData | null = null;
+
+  if (rawData && !error) {
+    try {
+      const parsed: CCUsageOutput = JSON.parse(rawData);
+      const today = new Date().toISOString().split("T")[0];
+
+      if (parsed.daily && parsed.daily.length > 0) {
+        const todayEntry = parsed.daily.find((d) => d.date === today);
+        if (todayEntry) {
+          data = {
+            ...todayEntry,
+            cost: todayEntry.totalCost || todayEntry.cost || 0,
+          };
+        } else {
+          const latest = parsed.daily[parsed.daily.length - 1];
+          data = {
+            ...latest,
+            cost: latest.totalCost || latest.cost || 0,
+          };
+        }
+      }
+    } catch (parseError) {
+      console.error("Failed to parse daily usage:", parseError);
+    }
+  }
+
+  return { data, isLoading, error, revalidate };
+}
+
+export function useMenuBarMonthlyUsage() {
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "monthly", "--json"], execOptions);
+
+  let data: MonthlyUsageData | null = null;
+
+  if (rawData && !error) {
+    try {
+      const parsed: CCUsageOutput = JSON.parse(rawData);
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+
+      if (parsed.monthly && parsed.monthly.length > 0) {
+        const currentMonthEntry = parsed.monthly.find((m) => m.month === currentMonth);
+        if (currentMonthEntry) {
+          data = {
+            ...currentMonthEntry,
+            cost: currentMonthEntry.totalCost || 0,
+          };
+        } else {
+          // If no current month data, return the latest month
+          const latest = parsed.monthly[parsed.monthly.length - 1];
+          data = {
+            ...latest,
+            cost: latest.totalCost || 0,
+          };
+        }
+      }
+    } catch (parseError) {
+      console.error("Failed to parse monthly usage:", parseError);
+    }
+  }
+
+  return { data, isLoading, error, revalidate };
+}
+
+export function useMenuBarTotalUsage() {
+  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--json"], execOptions);
+
+  let data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null = null;
+
+  if (rawData && !error) {
+    try {
+      const parsed: CCUsageOutput = JSON.parse(rawData);
+
+      if (parsed.totals) {
+        data = {
+          inputTokens: parsed.totals.inputTokens || 0,
+          outputTokens: parsed.totals.outputTokens || 0,
+          totalTokens: parsed.totals.totalTokens || 0,
+          cost: parsed.totals.totalCost || 0,
+        };
+      }
+    } catch (parseError) {
+      console.error("Failed to parse total usage:", parseError);
+    }
+  }
+
+  return { data, isLoading, error, revalidate };
+}

@@ -1,15 +1,20 @@
 import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
-import { useccusageAvailability, useDailyUsage, useMonthlyUsage, useTotalUsage } from "./hooks/use-usage-data";
+import { 
+  useccusageAvailability, 
+  useMenuBarDailyUsage, 
+  useMenuBarMonthlyUsage, 
+  useMenuBarTotalUsage 
+} from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
 
 export default function MenuBarccusage() {
   // Check ccusage availability
   const { isAvailable, isLoading: availabilityLoading } = useccusageAvailability();
 
-  // Get usage data (only when menu bar is displayed)
-  const { data: dailyUsage, isLoading: dailyLoading } = useDailyUsage(0); // No refresh interval
-  const { data: monthlyUsage, isLoading: monthlyLoading } = useMonthlyUsage();
-  const { data: totalUsage, isLoading: totalLoading } = useTotalUsage(0); // No refresh interval
+  // Get usage data (only when menu bar is displayed, no auto-refresh)
+  const { data: dailyUsage, isLoading: dailyLoading } = useMenuBarDailyUsage();
+  const { data: monthlyUsage, isLoading: monthlyLoading } = useMenuBarMonthlyUsage();
+  const { data: totalUsage, isLoading: totalLoading } = useMenuBarTotalUsage();
 
   const isLoading = availabilityLoading || dailyLoading || monthlyLoading || totalLoading;
 
