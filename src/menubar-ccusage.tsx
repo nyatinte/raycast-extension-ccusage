@@ -5,7 +5,7 @@ import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
 import { execSync } from "child_process";
 import { cpus } from "os";
 
-function getEnhancedNodePaths(): string {
+const getEnhancedNodePaths = (): string => {
   const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
 
   const platformPaths = isAppleSilicon
@@ -24,17 +24,17 @@ function getEnhancedNodePaths(): string {
   const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
   return allPaths.filter((path) => path).join(":");
-}
+};
 
-function getCostBasedIcon(cost: number) {
+const getCostBasedIcon = (cost: number): { tintColor: "SecondaryText" | "Green" | "Yellow" | "Orange" | "Red" } => {
   if (cost === 0) return { tintColor: "SecondaryText" as const };
   if (cost < 1) return { tintColor: "Green" as const };
   if (cost < 5) return { tintColor: "Yellow" as const };
   if (cost < 20) return { tintColor: "Orange" as const };
   return { tintColor: "Red" as const };
-}
+};
 
-interface UsageEntry {
+type UsageEntry = {
   date?: string;
   month?: string;
   inputTokens: number;
@@ -42,9 +42,9 @@ interface UsageEntry {
   totalTokens: number;
   totalCost?: number;
   cost?: number;
-}
+};
 
-interface ParsedData {
+type ParsedData = {
   daily?: UsageEntry[];
   monthly?: UsageEntry[];
   totals?: {
@@ -53,9 +53,9 @@ interface ParsedData {
     totalTokens: number;
     totalCost: number;
   };
-}
+};
 
-function processUsageData(data: ParsedData, type: "daily" | "monthly" | "total") {
+const processUsageData = (data: ParsedData, type: "daily" | "monthly" | "total"): UsageEntry | null => {
   if (type === "daily" && data.daily && data.daily.length > 0) {
     const today = new Date().toISOString().split("T")[0];
     const todayEntry = data.daily.find((d) => d.date === today);
@@ -86,7 +86,7 @@ function processUsageData(data: ParsedData, type: "daily" | "monthly" | "total")
   }
 
   return null;
-}
+};
 
 export default function MenuBarccusage() {
   // Check ccusage availability
@@ -187,7 +187,7 @@ export default function MenuBarccusage() {
   }
 
   // Calculate menu bar icon based on daily usage
-  const getMenuBarIcon = () => {
+  const getMenuBarIcon = (): { source: Icon; tintColor: Color } => {
     if (!usageData?.dailyUsage) {
       return { source: Icon.Coins, tintColor: Color.SecondaryText };
     }
@@ -197,7 +197,7 @@ export default function MenuBarccusage() {
     return { source: Icon.Coins, tintColor: Color[colorConfig.tintColor] };
   };
 
-  const getTooltip = () => {
+  const getTooltip = (): string => {
     if (!usageData?.dailyUsage) {
       return "No Claude usage today";
     }

@@ -12,7 +12,7 @@ type DailyUsageProps = {
 };
 
 export default function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
-  const getTrendIcon = (usage: DailyUsageData | null) => {
+  const getTrendIcon = (usage: DailyUsageData | null): Icon => {
     if (!usage) return Icon.Calendar;
 
     const intensity = getUsageIntensity(usage.totalTokens);
@@ -30,7 +30,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
     }
   };
 
-  const getTrendColor = (usage: DailyUsageData | null) => {
+  const getTrendColor = (usage: DailyUsageData | null): Color => {
     if (!usage) return Color.SecondaryText;
 
     const intensity = getUsageIntensity(usage.totalTokens);
@@ -48,7 +48,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
     }
   };
 
-  const getDetailMetadata = () => {
+  const getDetailMetadata = (): ReactNode => {
     if (error) {
       return (
         <List.Item.Detail.Metadata>
@@ -98,7 +98,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
     );
   };
 
-  const getAccessories = () => {
+  const getAccessories = (): List.Item.Accessory[] => {
     if (error) {
       return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
     }

@@ -17,7 +17,7 @@ type SessionUsageProps = {
 };
 
 export default function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
-  const getDetailMetadata = () => {
+  const getDetailMetadata = (): ReactNode => {
     if (error) {
       return (
         <List.Item.Detail.Metadata>

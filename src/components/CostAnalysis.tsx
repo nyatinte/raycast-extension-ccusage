@@ -21,7 +21,7 @@ export default function CostAnalysis({
   error,
   settingsActions,
 }: CostAnalysisProps) {
-  const getCostIcon = (cost: number) => {
+  const getCostIcon = (cost: number): Icon => {
     if (cost === 0) return Icon.Circle;
     if (cost < 1) return Icon.Coins;
     if (cost < 10) return Icon.BankNote;
@@ -29,7 +29,7 @@ export default function CostAnalysis({
     return Icon.Calculator;
   };
 
-  const getCostColor = (cost: number) => {
+  const getCostColor = (cost: number): Color => {
     if (cost === 0) return Color.SecondaryText;
     if (cost < 1) return Color.Green;
     if (cost < 10) return Color.Yellow;
@@ -37,7 +37,7 @@ export default function CostAnalysis({
     return Color.Red;
   };
 
-  const getDetailMetadata = () => {
+  const getDetailMetadata = (): ReactNode => {
     if (error) {
       return (
         <List.Item.Detail.Metadata>
@@ -156,7 +156,7 @@ export default function CostAnalysis({
 
   const mainCost = totalUsage?.cost || 0;
 
-  const getAccessories = () => {
+  const getAccessories = (): List.Item.Accessory[] => {
     if (error) {
       return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
     }

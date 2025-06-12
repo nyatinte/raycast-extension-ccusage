@@ -4,7 +4,7 @@ import { cpus } from "os";
 import { UsageStats, CCUsageOutput, DailyUsageData, SessionData } from "../types/usage-types";
 import { getRecentSessions, calculateModelUsage } from "../utils/usage-calculator";
 
-function getEnhancedNodePaths(): string {
+const getEnhancedNodePaths = (): string => {
   const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
 
   const platformPaths = isAppleSilicon
@@ -23,7 +23,7 @@ function getEnhancedNodePaths(): string {
   const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
   return allPaths.filter((path) => path).join(":");
-}
+};
 
 const execOptions = {
   shell: false,
@@ -38,7 +38,14 @@ const execOptions = {
   },
 };
 
-function useTotalUsage(refreshInterval: number = 30000) {
+const useTotalUsage = (
+  refreshInterval: number = 30000,
+): {
+  data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null;
+  isLoading: boolean;
+  error: Error | undefined;
+  revalidate: () => void;
+} => {
   const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "--json"], execOptions);
 
   let data: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null = null;
@@ -65,9 +72,11 @@ function useTotalUsage(refreshInterval: number = 30000) {
   }, refreshInterval);
 
   return { data, isLoading, error, revalidate };
-}
+};
 
-function useDailyUsage(refreshInterval: number = 10000) {
+const useDailyUsage = (
+  refreshInterval: number = 10000,
+): { data: DailyUsageData | null; isLoading: boolean; error: Error | undefined; revalidate: () => void } => {
   const {
     data: rawData,
     isLoading,
@@ -107,9 +116,11 @@ function useDailyUsage(refreshInterval: number = 10000) {
   }, refreshInterval);
 
   return { data, isLoading, error, revalidate };
-}
+};
 
-function useSessionUsage(refreshInterval: number = 15000) {
+const useSessionUsage = (
+  refreshInterval: number = 15000,
+): { data: SessionData[]; isLoading: boolean; error: Error | undefined; revalidate: () => void } => {
   const {
     data: rawData,
     isLoading,
@@ -146,7 +157,7 @@ function useSessionUsage(refreshInterval: number = 15000) {
   }, refreshInterval);
 
   return { data, isLoading, error, revalidate };
-}
+};
 
 export function useUsageStats(refreshInterval: number = 5000): UsageStats & { revalidate: () => void } {
   const totalUsage = useTotalUsage(refreshInterval);

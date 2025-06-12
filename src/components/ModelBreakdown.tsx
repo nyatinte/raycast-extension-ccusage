@@ -13,7 +13,7 @@ type ModelBreakdownProps = {
 };
 
 export default function ModelBreakdown({ models, isLoading, error, settingsActions }: ModelBreakdownProps) {
-  const getDetailMetadata = () => {
+  const getDetailMetadata = (): ReactNode => {
     if (error) {
       return (
         <List.Item.Detail.Metadata>
