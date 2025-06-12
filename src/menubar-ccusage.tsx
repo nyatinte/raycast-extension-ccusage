@@ -36,7 +36,7 @@ export default function MenuBarccusage() {
 
     try {
       const enhancedPath = getEnhancedNodePaths();
-      
+
       // Get daily, monthly, and total usage
       const [dailyResult, monthlyResult, totalResult] = await Promise.all([
         new Promise<string>((resolve, reject) => {
@@ -55,7 +55,7 @@ export default function MenuBarccusage() {
           try {
             const result = execSync("npx ccusage@latest monthly --json", {
               env: { ...process.env, PATH: enhancedPath },
-              encoding: "utf8", 
+              encoding: "utf8",
               timeout: 30000,
             });
             resolve(result);
@@ -86,7 +86,7 @@ export default function MenuBarccusage() {
       let dailyUsage = null;
       if (dailyData.daily && dailyData.daily.length > 0) {
         const today = new Date().toISOString().split("T")[0];
-        const todayEntry = dailyData.daily.find((d: any) => d.date === today);
+        const todayEntry = dailyData.daily.find((d: { date: string }) => d.date === today);
         if (todayEntry) {
           dailyUsage = {
             ...todayEntry,
@@ -105,7 +105,7 @@ export default function MenuBarccusage() {
       let monthlyUsage = null;
       if (monthlyData.monthly && monthlyData.monthly.length > 0) {
         const currentMonth = new Date().toISOString().slice(0, 7);
-        const currentMonthEntry = monthlyData.monthly.find((m: any) => m.month === currentMonth);
+        const currentMonthEntry = monthlyData.monthly.find((m: { month: string }) => m.month === currentMonth);
         if (currentMonthEntry) {
           monthlyUsage = {
             ...currentMonthEntry,

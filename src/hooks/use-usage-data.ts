@@ -298,7 +298,12 @@ export function useMonthlyUsage() {
 
 // MenuBar専用フック - useIntervalを使わない
 export function useMenuBarDailyUsage() {
-  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "daily", "--json"], execOptions);
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    revalidate,
+  } = useExec("npx", ["ccusage@latest", "daily", "--json"], execOptions);
 
   let data: DailyUsageData | null = null;
 
@@ -331,7 +336,12 @@ export function useMenuBarDailyUsage() {
 }
 
 export function useMenuBarMonthlyUsage() {
-  const { data: rawData, isLoading, error, revalidate } = useExec("npx", ["ccusage@latest", "monthly", "--json"], execOptions);
+  const {
+    data: rawData,
+    isLoading,
+    error,
+    revalidate,
+  } = useExec("npx", ["ccusage@latest", "monthly", "--json"], execOptions);
 
   let data: MonthlyUsageData | null = null;
 
