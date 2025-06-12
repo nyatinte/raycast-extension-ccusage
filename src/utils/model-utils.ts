@@ -25,10 +25,13 @@ export const getModelTier = (model: string): "Premium" | "Standard" | "Fast" | "
 };
 
 export const groupModelsByTier = <T extends { model: string }>(models: T[]) => {
-  return models.reduce((acc, model) => {
-    const tier = getModelTier(model.model || "");
-    if (!acc[tier]) acc[tier] = [];
-    acc[tier].push(model);
-    return acc;
-  }, {} as Record<string, T[]>);
+  return models.reduce(
+    (acc, model) => {
+      const tier = getModelTier(model.model || "");
+      if (!acc[tier]) acc[tier] = [];
+      acc[tier].push(model);
+      return acc;
+    },
+    {} as Record<string, T[]>,
+  );
 };

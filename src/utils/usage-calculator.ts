@@ -2,14 +2,14 @@ import { SessionData, ModelUsage } from "../types/usage-types";
 import { orderBy, sumBy, groupBy, minBy, meanBy } from "es-toolkit";
 
 export const getTopModels = (models: ModelUsage[], limit: number = 5): ModelUsage[] => {
-  return orderBy(models, ['totalTokens'], ['desc']).slice(0, limit);
+  return orderBy(models, ["totalTokens"], ["desc"]).slice(0, limit);
 };
 
 export const getRecentSessions = (sessions: SessionData[], limit: number = 10): SessionData[] => {
   return orderBy(
     sessions,
     [(session) => new Date(session.startTime || session.lastActivity).getTime()],
-    ['desc']
+    ["desc"],
   ).slice(0, limit);
 };
 
@@ -32,7 +32,7 @@ export const calculateAverageSessionTokens = (sessions: SessionData[]): number =
 
 export const calculateModelUsage = (sessions: SessionData[]): ModelUsage[] => {
   const sessionsByModel = groupBy(sessions, (session) => session.model || "unknown");
-  
+
   const modelUsages = Object.entries(sessionsByModel).map(([model, modelSessions]) => ({
     model,
     inputTokens: sumBy(modelSessions, (session) => session.inputTokens || 0),
@@ -42,7 +42,7 @@ export const calculateModelUsage = (sessions: SessionData[]): ModelUsage[] => {
     sessionCount: modelSessions.length,
   }));
 
-  return orderBy(modelUsages, ['totalTokens'], ['desc']);
+  return orderBy(modelUsages, ["totalTokens"], ["desc"]);
 };
 
 export const calculateEfficiencyMetrics = (
@@ -69,12 +69,12 @@ export const calculateEfficiencyMetrics = (
 
   // Group sessions by model and calculate efficiency
   const sessionsByModel = groupBy(sessions, (session) => session.model || "unknown");
-  
+
   const modelEfficiencies = Object.entries(sessionsByModel)
     .map(([model, modelSessions]) => {
       const totalModelCost = sumBy(modelSessions, (s) => s.cost);
       const totalModelOutput = sumBy(modelSessions, (s) => s.outputTokens);
-      
+
       return {
         model,
         efficiency: totalModelOutput > 0 ? totalModelCost / totalModelOutput : Infinity,
@@ -82,9 +82,8 @@ export const calculateEfficiencyMetrics = (
     })
     .filter(({ efficiency }) => efficiency !== Infinity);
 
-  const mostEfficientModel = modelEfficiencies.length > 0 
-    ? minBy(modelEfficiencies, ({ efficiency }) => efficiency)?.model || null
-    : null;
+  const mostEfficientModel =
+    modelEfficiencies.length > 0 ? minBy(modelEfficiencies, ({ efficiency }) => efficiency)?.model || null : null;
 
   return {
     averageInputOutputRatio,

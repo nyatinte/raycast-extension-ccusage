@@ -2,8 +2,91 @@ import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@rayc
 import { usePromise } from "@raycast/utils";
 import { useccusageAvailability } from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
-import { getEnhancedNodePaths, getCostBasedIcon, processUsageData } from "./utils/ccusage-common";
 import { execSync } from "child_process";
+import { cpus } from "os";
+
+function getEnhancedNodePaths(): string {
+  const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
+
+  const platformPaths = isAppleSilicon
+    ? ["/opt/homebrew/bin", "/opt/homebrew/lib/node_modules/.bin"]
+    : ["/usr/local/bin", "/usr/local/lib/node_modules/.bin"];
+
+  const versionManagerPaths = [
+    `${process.env.HOME}/.nvm/versions/node/*/bin`,
+    `${process.env.HOME}/.fnm/node-versions/*/installation/bin`,
+    `${process.env.HOME}/.n/bin`,
+    `${process.env.HOME}/.volta/bin`,
+  ];
+
+  const systemPaths = ["/usr/bin", "/bin", `${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`];
+
+  const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
+
+  return allPaths.filter((path) => path).join(":");
+}
+
+function getCostBasedIcon(cost: number) {
+  if (cost === 0) return { tintColor: "SecondaryText" as const };
+  if (cost < 1) return { tintColor: "Green" as const };
+  if (cost < 5) return { tintColor: "Yellow" as const };
+  if (cost < 20) return { tintColor: "Orange" as const };
+  return { tintColor: "Red" as const };
+}
+
+interface UsageEntry {
+  date?: string;
+  month?: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  totalCost?: number;
+  cost?: number;
+}
+
+interface ParsedData {
+  daily?: UsageEntry[];
+  monthly?: UsageEntry[];
+  totals?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    totalCost: number;
+  };
+}
+
+function processUsageData(data: ParsedData, type: "daily" | "monthly" | "total") {
+  if (type === "daily" && data.daily && data.daily.length > 0) {
+    const today = new Date().toISOString().split("T")[0];
+    const todayEntry = data.daily.find((d) => d.date === today);
+    const entry = todayEntry || data.daily[data.daily.length - 1];
+    return {
+      ...entry,
+      cost: entry.totalCost || entry.cost || 0,
+    };
+  }
+
+  if (type === "monthly" && data.monthly && data.monthly.length > 0) {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonthEntry = data.monthly.find((m) => m.month === currentMonth);
+    const entry = currentMonthEntry || data.monthly[data.monthly.length - 1];
+    return {
+      ...entry,
+      cost: entry.totalCost || 0,
+    };
+  }
+
+  if (type === "total" && data.totals) {
+    return {
+      inputTokens: data.totals.inputTokens || 0,
+      outputTokens: data.totals.outputTokens || 0,
+      totalTokens: data.totals.totalTokens || 0,
+      cost: data.totals.totalCost || 0,
+    };
+  }
+
+  return null;
+}
 
 export default function MenuBarccusage() {
   // Check ccusage availability

@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { ReactNode } from "react";
 import { SessionData } from "../types/usage-types";
 import { formatTokens, formatCost, formatRelativeTime, formatModelName } from "../utils/data-formatter";
@@ -17,7 +17,6 @@ type SessionUsageProps = {
 };
 
 export default function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
-
   const getDetailMetadata = () => {
     if (error) {
       return (

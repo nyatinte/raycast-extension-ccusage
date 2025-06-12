@@ -40,11 +40,6 @@ export const formatDate = (dateString: string): string => {
   return isValid(date) ? format(date, "yyyy/MM/dd") : dateString;
 };
 
-export const formatDateTime = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return isValid(date) ? format(date, "MMM dd, yyyy HH:mm") : dateString;
-};
-
 export const formatRelativeTime = (dateString: string): string => {
   const date = parseISO(dateString);
   return isValid(date) ? formatDistanceToNow(date, { addSuffix: true }) : dateString;
@@ -79,8 +74,4 @@ export const getCostPerMTok = (cost: number, totalTokens: number): string => {
   if (totalTokens === 0) return "$0.00/MTok";
   const costPerMTok = (cost / totalTokens) * 1000000;
   return `$${costPerMTok.toFixed(2)}/MTok`;
-};
-
-export const formatTodaysDate = (): string => {
-  return format(new Date(), "yyyy/MM/dd");
 };

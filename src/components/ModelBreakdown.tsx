@@ -3,7 +3,7 @@ import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
 import { formatTokens, formatCost, formatModelName, getCostPerMTok } from "../utils/data-formatter";
 import { getTopModels } from "../utils/usage-calculator";
-import { getModelIcon, getModelIconColor, getModelTier, groupModelsByTier } from "../utils/model-utils";
+import { getModelIcon, getModelIconColor, groupModelsByTier } from "../utils/model-utils";
 
 type ModelBreakdownProps = {
   models: ModelUsage[];
@@ -13,7 +13,6 @@ type ModelBreakdownProps = {
 };
 
 export default function ModelBreakdown({ models, isLoading, error, settingsActions }: ModelBreakdownProps) {
-
   const getDetailMetadata = () => {
     if (error) {
       return (

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Base schemas
-export const DailyUsageDataSchema = z.object({
+const DailyUsageDataSchema = z.object({
   date: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
@@ -12,7 +12,7 @@ export const DailyUsageDataSchema = z.object({
   cost: z.number(), // For compatibility, derived from totalCost
 });
 
-export const SessionDataSchema = z.object({
+const SessionDataSchema = z.object({
   sessionId: z.string(),
   projectPath: z.string(),
   lastActivity: z.string(),
@@ -42,7 +42,7 @@ export const SessionDataSchema = z.object({
   projectName: z.string().optional(),
 });
 
-export const ModelUsageSchema = z.object({
+const ModelUsageSchema = z.object({
   model: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
@@ -51,7 +51,7 @@ export const ModelUsageSchema = z.object({
   sessionCount: z.number(),
 });
 
-export const MonthlyUsageDataSchema = z.object({
+const MonthlyUsageDataSchema = z.object({
   month: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
@@ -73,27 +73,6 @@ export const MonthlyUsageDataSchema = z.object({
       }),
     )
     .optional(),
-});
-
-export const TotalUsageSchema = z.object({
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  totalTokens: z.number(),
-  cost: z.number(),
-});
-
-export const UsageDataSchema = z.object({
-  daily: DailyUsageDataSchema.nullable(),
-  total: TotalUsageSchema.nullable(),
-  sessions: z.array(SessionDataSchema),
-  models: z.array(ModelUsageSchema),
-  error: z.string().optional(),
-  lastUpdated: z.string(),
-});
-
-export const CCUsageCommandResultSchema = z.object({
-  stdout: z.string(),
-  stderr: z.string(),
 });
 
 export const CCUsageOutputSchema = z.object({
@@ -120,7 +99,14 @@ export const CCUsageOutputSchema = z.object({
 
 export const UsageStatsSchema = z.object({
   todayUsage: DailyUsageDataSchema.nullable(),
-  totalUsage: TotalUsageSchema.nullable(),
+  totalUsage: z
+    .object({
+      inputTokens: z.number(),
+      outputTokens: z.number(),
+      totalTokens: z.number(),
+      cost: z.number(),
+    })
+    .nullable(),
   recentSessions: z.array(SessionDataSchema),
   topModels: z.array(ModelUsageSchema),
   isLoading: z.boolean(),
@@ -129,10 +115,7 @@ export const UsageStatsSchema = z.object({
 
 // Export types inferred from schemas
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
-export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
 export type SessionData = z.infer<typeof SessionDataSchema>;
 export type ModelUsage = z.infer<typeof ModelUsageSchema>;
-export type UsageData = z.infer<typeof UsageDataSchema>;
-export type CCUsageCommandResult = z.infer<typeof CCUsageCommandResultSchema>;
 export type CCUsageOutput = z.infer<typeof CCUsageOutputSchema>;
 export type UsageStats = z.infer<typeof UsageStatsSchema>;
