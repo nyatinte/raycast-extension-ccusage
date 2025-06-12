@@ -212,7 +212,7 @@ export default function MenuBarccusage() {
 
   return (
     <MenuBarExtra icon={getMenuBarIcon()} tooltip={getTooltip()}>
-      <MenuBarExtra.Section title="Today's Usage">
+      <MenuBarExtra.Section title="Today">
         <MenuBarExtra.Item
           title={
             usageData?.dailyUsage
