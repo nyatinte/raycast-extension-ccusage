@@ -143,7 +143,12 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
             />
           )}
           {settingsActions}
-          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} shortcut={{ modifiers: ["cmd"], key: "," }} />
+          <Action
+            title="Open Preferences"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
+            shortcut={{ modifiers: ["cmd"], key: "," }}
+          />
           <Action.OpenInBrowser
             title="View Ccusage Repository"
             url="https://github.com/ryoppippi/ccusage"

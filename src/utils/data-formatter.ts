@@ -79,12 +79,12 @@ export const getCostPerMTok = (cost: number, totalTokens: number): string => {
 export const formatDateWithTimezone = (dateString: string, timezone: string = "UTC"): string => {
   // First try parseISO
   let date = parseISO(dateString);
-  
+
   // If parseISO fails, try parsing as a regular date
   if (!isValid(date)) {
     date = new Date(dateString);
   }
-  
+
   // If still invalid, return the original string
   if (!isValid(date)) return dateString;
 
@@ -98,12 +98,12 @@ export const formatDateWithTimezone = (dateString: string, timezone: string = "U
 export const formatRelativeTimeWithTimezone = (dateString: string, timezone: string = "UTC"): string => {
   // First try parseISO
   let date = parseISO(dateString);
-  
+
   // If parseISO fails, try parsing as a regular date
   if (!isValid(date)) {
     date = new Date(dateString);
   }
-  
+
   // If still invalid, return the original string
   if (!isValid(date)) return dateString;
 

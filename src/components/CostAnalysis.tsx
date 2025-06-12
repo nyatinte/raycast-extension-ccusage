@@ -190,7 +190,12 @@ export default function CostAnalysis({
             />
           )}
           {settingsActions}
-          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} shortcut={{ modifiers: ["cmd"], key: "," }} />
+          <Action
+            title="Open Preferences"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
+            shortcut={{ modifiers: ["cmd"], key: "," }}
+          />
           <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
           <Action.OpenInBrowser
             title="Usage Guidelines"
