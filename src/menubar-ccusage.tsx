@@ -169,22 +169,22 @@ export default function MenuBarccusage() {
 
   if (!isAvailable) {
     return (
-      <MenuBarExtra icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} tooltip="ccusageが利用できません">
+      <MenuBarExtra icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} tooltip="ccusage is not available">
         <MenuBarExtra.Item
-          title="ccusageが利用できません"
-          subtitle="Preferencesでランタイムとパスを設定してください"
+          title="ccusage is not available"
+          subtitle="Please configure runtime and path in Preferences"
           icon={Icon.ExclamationMark}
           onAction={openExtensionPreferences}
         />
         <MenuBarExtra.Item
-          title="Preferencesで設定する"
-          subtitle="JavaScriptランタイム（npx, pnpm等）を選択"
+          title="Open Preferences"
+          subtitle="Select JavaScript runtime (npx, pnpm, etc.)"
           icon={Icon.Gear}
           onAction={openExtensionPreferences}
         />
         <MenuBarExtra.Item
-          title="ccusageについて詳しく"
-          subtitle="GitHub リポジトリを開く"
+          title="Learn more about ccusage"
+          subtitle="Open GitHub repository"
           icon={Icon.Code}
           onAction={() => open("https://github.com/ryoppippi/ccusage")}
         />

@@ -17,11 +17,8 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
     if (error) {
       return (
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="エラー" text="ccusageが利用できません" icon={Icon.ExclamationMark} />
-          <List.Item.Detail.Metadata.Label
-            title="解決方法"
-            text="PreferencesでJavaScriptランタイムを設定してください"
-          />
+          <List.Item.Detail.Metadata.Label title="Error" text="ccusage is not available" icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="Solution" text="Please configure JavaScript runtime in Preferences" />
         </List.Item.Detail.Metadata>
       );
     }
@@ -132,7 +129,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
 
   const getAccessories = (): List.Item.Accessory[] => {
     if (error) {
-      return [{ text: "設定が必要", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
+      return [{ text: "Setup required", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
     }
 
     if (!models || models.length === 0) {
@@ -153,7 +150,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
         <ActionPanel>
           {error && (
             <Action
-              title="Preferencesで設定する"
+              title="Open Preferences"
               icon={Icon.Gear}
               onAction={openExtensionPreferences}
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
