@@ -68,7 +68,7 @@ After configuration is complete, re-run the extension.
         shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
       />
       <Action.OpenInBrowser
-        title="View Ccusage Repository"
+        title="View ccusage Repository"
         url="https://github.com/ryoppippi/ccusage"
         icon={Icon.Code}
       />
