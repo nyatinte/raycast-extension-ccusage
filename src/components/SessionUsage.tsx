@@ -117,6 +117,7 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
             />
           )}
           {settingsActions}
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} shortcut={{ modifiers: ["cmd"], key: "," }} />
           <Action.OpenInBrowser title="View Session Data" url="https://claude.ai/code" icon={Icon.Clock} />
         </ActionPanel>
       }

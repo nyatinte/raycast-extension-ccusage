@@ -160,6 +160,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
             />
           )}
           {settingsActions}
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} shortcut={{ modifiers: ["cmd"], key: "," }} />
           <Action.OpenInBrowser
             title="Claude Model Comparison"
             url="https://docs.anthropic.com/claude/docs/models-overview"
