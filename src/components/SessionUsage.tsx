@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, getPreferenceValues, openExtensionPreferences, Color } from "@raycast/api";
 import { ReactNode } from "react";
 import { SessionData, Preferences } from "../types/usage-types";
 import { formatTokens, formatCost, formatRelativeTime, formatRelativeTimeWithTimezone, formatModelName } from "../utils/data-formatter";
@@ -22,7 +22,8 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
     if (error) {
       return (
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Error" text={error} icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="エラー" text="ccusageが利用できません" icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="解決方法" text="PreferencesでJavaScriptランタイムを設定してください" />
         </List.Item.Detail.Metadata>
       );
     }
@@ -85,14 +86,35 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
     );
   };
 
+  const getAccessories = (): List.Item.Accessory[] => {
+    if (error) {
+      return [{ text: "設定が必要", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
+    }
+
+    if (!sessions || sessions.length === 0) {
+      return [{ text: "No sessions", icon: Icon.Circle }];
+    }
+
+    return [{ text: `${sessions.length} sessions`, icon: Icon.List }];
+  };
+
   return (
     <List.Item
       id="sessions"
       title="Sessions"
       icon={Icon.List}
+      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {error && (
+            <Action
+              title="Preferencesで設定する"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            />
+          )}
           {settingsActions}
           <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
           <Action.OpenInBrowser title="View Session Data" url="https://claude.ai/code" icon={Icon.Clock} />

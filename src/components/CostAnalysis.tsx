@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { ReactNode } from "react";
 import { DailyUsageData, ModelUsage } from "../types/usage-types";
 import { formatTokens, formatCost, getCostPerMTok, formatModelName } from "../utils/data-formatter";
@@ -41,7 +41,8 @@ export default function CostAnalysis({
     if (error) {
       return (
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Error" text={error} icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="エラー" text="ccusageが利用できません" icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="解決方法" text="PreferencesでJavaScriptランタイムを設定してください" />
         </List.Item.Detail.Metadata>
       );
     }
@@ -158,7 +159,7 @@ export default function CostAnalysis({
 
   const getAccessories = (): List.Item.Accessory[] => {
     if (error) {
-      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
+      return [{ text: "設定が必要", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
     }
 
     if (!totalUsage) {
@@ -177,6 +178,14 @@ export default function CostAnalysis({
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {error && (
+            <Action
+              title="Preferencesで設定する"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            />
+          )}
           {settingsActions}
           <Action.OpenInBrowser title="Claude Pricing" url="https://www.anthropic.com/pricing" icon={Icon.Coins} />
           <Action.OpenInBrowser

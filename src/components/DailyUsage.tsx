@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, Color, getPreferenceValues } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { DailyUsageData, Preferences } from "../types/usage-types";
 import { formatTokens, formatCost, formatDate, formatDateWithTimezone, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
 import { getUsageIntensity } from "../utils/usage-calculator";
@@ -53,7 +53,8 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
     if (error) {
       return (
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Error" text={error} icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="エラー" text="ccusageが利用できません" icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="解決方法" text="PreferencesでJavaScriptランタイムを設定してください" />
         </List.Item.Detail.Metadata>
       );
     }
@@ -101,7 +102,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
 
   const getAccessories = (): List.Item.Accessory[] => {
     if (error) {
-      return [{ text: "Error", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
+      return [{ text: "設定が必要", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
     }
 
     if (!dailyUsage) {
@@ -120,6 +121,14 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {error && (
+            <Action
+              title="Preferencesで設定する"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            />
+          )}
           {settingsActions}
           <Action.OpenInBrowser title="Open Claude Code" url="https://claude.ai/code" icon={Icon.Globe} />
           <Action.OpenInBrowser

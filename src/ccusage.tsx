@@ -25,18 +25,18 @@ export default function ccusage() {
     return (
       <List>
         <List.Item
-          title="ccusage not available"
-          subtitle="ccusage CLI tool is required but not working with the configured runtime"
+          title="ccusageが利用できません"
+          subtitle="PreferencesでJavaScriptランタイム（npx, pnpm, etc...）を選択し、パスを設定してください"
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Install Ccusage" url="https://github.com/ryoppippi/ccusage" />
               <Action
-                title="Configure Runtime in Preferences"
+                title="Preferencesで設定する"
                 icon={Icon.Gear}
                 onAction={openExtensionPreferences}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
+              <Action.OpenInBrowser title="ccusageについて詳しく" url="https://github.com/ryoppippi/ccusage" />
             </ActionPanel>
           }
         />

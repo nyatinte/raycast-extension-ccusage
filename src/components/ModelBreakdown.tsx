@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
 import { formatTokens, formatCost, formatModelName, getCostPerMTok } from "../utils/data-formatter";
 import { getTopModels } from "../utils/usage-calculator";
@@ -17,7 +17,8 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
     if (error) {
       return (
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Error" text={error} icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="エラー" text="ccusageが利用できません" icon={Icon.ExclamationMark} />
+          <List.Item.Detail.Metadata.Label title="解決方法" text="PreferencesでJavaScriptランタイムを設定してください" />
         </List.Item.Detail.Metadata>
       );
     }
@@ -126,14 +127,35 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
     );
   };
 
+  const getAccessories = (): List.Item.Accessory[] => {
+    if (error) {
+      return [{ text: "設定が必要", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
+    }
+
+    if (!models || models.length === 0) {
+      return [{ text: "No models", icon: Icon.Circle }];
+    }
+
+    return [{ text: `${models.length} models`, icon: Icon.BarChart }];
+  };
+
   return (
     <List.Item
       id="model-breakdown"
       title="Models"
       icon={Icon.BarChart}
+      accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
         <ActionPanel>
+          {error && (
+            <Action
+              title="Preferencesで設定する"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            />
+          )}
           {settingsActions}
           <Action.OpenInBrowser
             title="Claude Model Comparison"
