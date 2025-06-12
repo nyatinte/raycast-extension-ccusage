@@ -139,12 +139,16 @@ const useSessionUsage = (
         // Extract model from modelBreakdowns (ccusage actual structure)
         const primaryModel = session.modelBreakdowns?.[0]?.modelName || session.modelsUsed?.[0] || "unknown";
 
+        // Extract project name from sessionId (format: -Users-nyante-my-programs-raycast-ccusage)
+        const sessionIdParts = session.sessionId.split("-").filter((part) => part.length > 0);
+        const projectName = sessionIdParts.length > 0 ? sessionIdParts[sessionIdParts.length - 1] : "Unknown Project";
+
         return {
           ...session,
           cost: session.totalCost || session.cost || 0,
           startTime: session.lastActivity,
           model: primaryModel,
-          projectName: session.projectPath?.split("/").pop() || "Unknown Project",
+          projectName: projectName,
         };
       });
     } catch (parseError) {
