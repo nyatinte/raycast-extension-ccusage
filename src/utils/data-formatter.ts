@@ -79,65 +79,67 @@ export const getCostPerMTok = (cost: number, totalTokens: number): string => {
 export const formatDateWithTimezone = (dateString: string, timezone: string = "UTC"): string => {
   const date = parseISO(dateString);
   if (!isValid(date)) return dateString;
-  
+
   // Convert to target timezone by adjusting the time
   const offsetMinutes = getTimezoneOffset(timezone);
   const adjustedDate = new Date(date.getTime() + offsetMinutes * 60 * 1000);
-  
+
   return format(adjustedDate, "yyyy/MM/dd HH:mm");
 };
 
 export const formatRelativeTimeWithTimezone = (dateString: string, timezone: string = "UTC"): string => {
   const date = parseISO(dateString);
   if (!isValid(date)) return dateString;
-  
+
   // Convert to target timezone by adjusting the time
   const offsetMinutes = getTimezoneOffset(timezone);
   const adjustedDate = new Date(date.getTime() + offsetMinutes * 60 * 1000);
-  
+
   return formatDistanceToNow(adjustedDate, { addSuffix: true });
 };
 
 // Simple timezone offset calculation for common timezones
 const getTimezoneOffset = (timezone: string): number => {
-  return match(timezone)
-    .with("UTC", () => 0)
-    // Asia
-    .with("Asia/Tokyo", () => 9 * 60) // UTC+9
-    .with("Asia/Shanghai", () => 8 * 60) // UTC+8
-    .with("Asia/Seoul", () => 9 * 60) // UTC+9
-    .with("Asia/Hong_Kong", () => 8 * 60) // UTC+8
-    .with("Asia/Singapore", () => 8 * 60) // UTC+8
-    .with("Asia/Bangkok", () => 7 * 60) // UTC+7
-    .with("Asia/Dubai", () => 4 * 60) // UTC+4
-    .with("Asia/Kolkata", () => 5 * 60 + 30) // UTC+5:30
-    // Europe
-    .with("Europe/London", () => getCurrentOffset("Europe/London"))
-    .with("Europe/Paris", () => getCurrentOffset("Europe/Paris"))
-    .with("Europe/Berlin", () => getCurrentOffset("Europe/Berlin"))
-    .with("Europe/Rome", () => getCurrentOffset("Europe/Rome"))
-    .with("Europe/Amsterdam", () => getCurrentOffset("Europe/Amsterdam"))
-    .with("Europe/Stockholm", () => getCurrentOffset("Europe/Stockholm"))
-    .with("Europe/Moscow", () => 3 * 60) // UTC+3
-    // Americas
-    .with("America/New_York", () => getCurrentOffset("America/New_York"))
-    .with("America/Chicago", () => getCurrentOffset("America/Chicago"))
-    .with("America/Denver", () => getCurrentOffset("America/Denver"))
-    .with("America/Los_Angeles", () => getCurrentOffset("America/Los_Angeles"))
-    .with("America/Toronto", () => getCurrentOffset("America/Toronto"))
-    .with("America/Vancouver", () => getCurrentOffset("America/Vancouver"))
-    .with("America/Mexico_City", () => getCurrentOffset("America/Mexico_City"))
-    .with("America/Sao_Paulo", () => getCurrentOffset("America/Sao_Paulo"))
-    .with("America/Argentina/Buenos_Aires", () => -3 * 60) // UTC-3
-    // Australia & Pacific
-    .with("Australia/Sydney", () => getCurrentOffset("Australia/Sydney"))
-    .with("Australia/Melbourne", () => getCurrentOffset("Australia/Melbourne"))
-    .with("Australia/Perth", () => 8 * 60) // UTC+8
-    .with("Pacific/Auckland", () => getCurrentOffset("Pacific/Auckland"))
-    // Africa
-    .with("Africa/Cairo", () => getCurrentOffset("Africa/Cairo"))
-    .with("Africa/Johannesburg", () => 2 * 60) // UTC+2
-    .otherwise(() => 0);
+  return (
+    match(timezone)
+      .with("UTC", () => 0)
+      // Asia
+      .with("Asia/Tokyo", () => 9 * 60) // UTC+9
+      .with("Asia/Shanghai", () => 8 * 60) // UTC+8
+      .with("Asia/Seoul", () => 9 * 60) // UTC+9
+      .with("Asia/Hong_Kong", () => 8 * 60) // UTC+8
+      .with("Asia/Singapore", () => 8 * 60) // UTC+8
+      .with("Asia/Bangkok", () => 7 * 60) // UTC+7
+      .with("Asia/Dubai", () => 4 * 60) // UTC+4
+      .with("Asia/Kolkata", () => 5 * 60 + 30) // UTC+5:30
+      // Europe
+      .with("Europe/London", () => getCurrentOffset("Europe/London"))
+      .with("Europe/Paris", () => getCurrentOffset("Europe/Paris"))
+      .with("Europe/Berlin", () => getCurrentOffset("Europe/Berlin"))
+      .with("Europe/Rome", () => getCurrentOffset("Europe/Rome"))
+      .with("Europe/Amsterdam", () => getCurrentOffset("Europe/Amsterdam"))
+      .with("Europe/Stockholm", () => getCurrentOffset("Europe/Stockholm"))
+      .with("Europe/Moscow", () => 3 * 60) // UTC+3
+      // Americas
+      .with("America/New_York", () => getCurrentOffset("America/New_York"))
+      .with("America/Chicago", () => getCurrentOffset("America/Chicago"))
+      .with("America/Denver", () => getCurrentOffset("America/Denver"))
+      .with("America/Los_Angeles", () => getCurrentOffset("America/Los_Angeles"))
+      .with("America/Toronto", () => getCurrentOffset("America/Toronto"))
+      .with("America/Vancouver", () => getCurrentOffset("America/Vancouver"))
+      .with("America/Mexico_City", () => getCurrentOffset("America/Mexico_City"))
+      .with("America/Sao_Paulo", () => getCurrentOffset("America/Sao_Paulo"))
+      .with("America/Argentina/Buenos_Aires", () => -3 * 60) // UTC-3
+      // Australia & Pacific
+      .with("Australia/Sydney", () => getCurrentOffset("Australia/Sydney"))
+      .with("Australia/Melbourne", () => getCurrentOffset("Australia/Melbourne"))
+      .with("Australia/Perth", () => 8 * 60) // UTC+8
+      .with("Pacific/Auckland", () => getCurrentOffset("Pacific/Auckland"))
+      // Africa
+      .with("Africa/Cairo", () => getCurrentOffset("Africa/Cairo"))
+      .with("Africa/Johannesburg", () => 2 * 60) // UTC+2
+      .otherwise(() => 0)
+  );
 };
 
 // Get current offset for timezones that observe daylight saving time
@@ -145,7 +147,7 @@ const getCurrentOffset = (timezone: string): number => {
   try {
     const now = new Date();
     const utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-    const targetTime = new Date(utc.toLocaleString('en-US', { timeZone: timezone }));
+    const targetTime = new Date(utc.toLocaleString("en-US", { timeZone: timezone }));
     return Math.round((targetTime.getTime() - utc.getTime()) / (1000 * 60));
   } catch {
     return 0; // Fallback to UTC if timezone is not supported

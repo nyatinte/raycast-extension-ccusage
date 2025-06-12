@@ -1,6 +1,12 @@
 import { List, Icon, ActionPanel, Action, Color, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { DailyUsageData, Preferences } from "../types/usage-types";
-import { formatTokens, formatCost, formatDate, formatDateWithTimezone, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
+import {
+  formatTokens,
+  formatCost,
+  formatDateWithTimezone,
+  getTokenEfficiency,
+  getCostPerMTok,
+} from "../utils/data-formatter";
 import { getUsageIntensity } from "../utils/usage-calculator";
 import { ReactNode } from "react";
 
@@ -54,7 +60,10 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
       return (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="エラー" text="ccusageが利用できません" icon={Icon.ExclamationMark} />
-          <List.Item.Detail.Metadata.Label title="解決方法" text="PreferencesでJavaScriptランタイムを設定してください" />
+          <List.Item.Detail.Metadata.Label
+            title="解決方法"
+            text="PreferencesでJavaScriptランタイムを設定してください"
+          />
         </List.Item.Detail.Metadata>
       );
     }
@@ -75,7 +84,11 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
 
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="Date" text={formatDateWithTimezone(dailyUsage.date, preferences.timezone)} icon={Icon.Calendar} />
+        <List.Item.Detail.Metadata.Label
+          title="Date"
+          text={formatDateWithTimezone(dailyUsage.date, preferences.timezone)}
+          icon={Icon.Calendar}
+        />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />

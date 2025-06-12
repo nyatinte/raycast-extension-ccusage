@@ -36,7 +36,7 @@ export default function ccusage() {
                 onAction={openExtensionPreferences}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
-              <Action.OpenInBrowser title="ccusageについて詳しく" url="https://github.com/ryoppippi/ccusage" />
+              <Action.OpenInBrowser title="Ccusageについて詳しく" url="https://github.com/ryoppippi/ccusage" />
             </ActionPanel>
           }
         />

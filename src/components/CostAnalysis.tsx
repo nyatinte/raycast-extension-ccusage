@@ -42,7 +42,10 @@ export default function CostAnalysis({
       return (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="エラー" text="ccusageが利用できません" icon={Icon.ExclamationMark} />
-          <List.Item.Detail.Metadata.Label title="解決方法" text="PreferencesでJavaScriptランタイムを設定してください" />
+          <List.Item.Detail.Metadata.Label
+            title="解決方法"
+            text="PreferencesでJavaScriptランタイムを設定してください"
+          />
         </List.Item.Detail.Metadata>
       );
     }
