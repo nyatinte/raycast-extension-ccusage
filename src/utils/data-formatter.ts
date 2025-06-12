@@ -88,11 +88,32 @@ export const formatDateWithTimezone = (dateString: string, timezone: string = "U
   // If still invalid, return the original string
   if (!isValid(date)) return dateString;
 
-  // Convert to target timezone by adjusting the time
+  // For JST/Asia timezones, use the modern approach with Intl.DateTimeFormat
+  if (timezone === "JST" || timezone.startsWith("Asia/")) {
+    const targetTimezone = timezone === "JST" ? "Asia/Tokyo" : timezone;
+    try {
+      // Format the date in the target timezone
+      const formatter = new Intl.DateTimeFormat("ja-JP", {
+        timeZone: targetTimezone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+      const parts = formatter.formatToParts(date);
+      const year = parts.find((part) => part.type === "year")?.value;
+      const month = parts.find((part) => part.type === "month")?.value;
+      const day = parts.find((part) => part.type === "day")?.value;
+      return `${year}/${month}/${day}`;
+    } catch {
+      // Fallback to original logic if Intl.DateTimeFormat fails
+    }
+  }
+
+  // Convert to target timezone by adjusting the time (for other timezones)
   const offsetMinutes = getTimezoneOffset(timezone);
   const adjustedDate = new Date(date.getTime() + offsetMinutes * 60 * 1000);
 
-  return format(adjustedDate, "yyyy/MM/dd HH:mm");
+  return format(adjustedDate, "yyyy/MM/dd");
 };
 
 export const formatRelativeTimeWithTimezone = (dateString: string, timezone: string = "UTC"): string => {
@@ -107,7 +128,20 @@ export const formatRelativeTimeWithTimezone = (dateString: string, timezone: str
   // If still invalid, return the original string
   if (!isValid(date)) return dateString;
 
-  // Convert to target timezone by adjusting the time
+  // For JST/Asia timezones, calculate the proper offset
+  if (timezone === "JST" || timezone.startsWith("Asia/")) {
+    try {
+      // Calculate the difference from the adjusted target date
+      const offsetMinutes = 9 * 60; // JST offset
+      const adjustedDate = new Date(date.getTime() + offsetMinutes * 60 * 1000);
+
+      return formatDistanceToNow(adjustedDate, { addSuffix: true });
+    } catch {
+      // Fallback to original logic if calculation fails
+    }
+  }
+
+  // Convert to target timezone by adjusting the time (for other timezones)
   const offsetMinutes = getTimezoneOffset(timezone);
   const adjustedDate = new Date(date.getTime() + offsetMinutes * 60 * 1000);
 
@@ -119,6 +153,8 @@ const getTimezoneOffset = (timezone: string): number => {
   return (
     match(timezone)
       .with("UTC", () => 0)
+      // JST shorthand
+      .with("JST", () => 9 * 60) // UTC+9
       // Asia
       .with("Asia/Tokyo", () => 9 * 60) // UTC+9
       .with("Asia/Shanghai", () => 8 * 60) // UTC+8
