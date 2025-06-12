@@ -194,51 +194,37 @@ export default function MenuBarccusage() {
     <MenuBarExtra icon={getMenuBarIcon()} tooltip={getTooltip()}>
       <MenuBarExtra.Section title="Today's Usage">
         <MenuBarExtra.Item
-          title="Daily Cost"
-          subtitle={
+          title={
             usageData?.dailyUsage
               ? `${formatCost(usageData.dailyUsage.cost)} • ${formatTokensAsMTok(usageData.dailyUsage.totalTokens)}`
               : "No usage today"
           }
           icon={Icon.Calendar}
+          onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
         />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Monthly Usage">
         <MenuBarExtra.Item
-          title="Monthly Cost"
-          subtitle={
+          title={
             usageData?.monthlyUsage
               ? `${formatCost(usageData.monthlyUsage.cost)} • ${formatTokensAsMTok(usageData.monthlyUsage.totalTokens)}`
               : "No usage this month"
           }
           icon={Icon.BarChart}
+          onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
         />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Total Usage">
         <MenuBarExtra.Item
-          title="Total Cost"
-          subtitle={
+          title={
             usageData?.totalUsage
               ? `${formatCost(usageData.totalUsage.cost)} • ${formatTokensAsMTok(usageData.totalUsage.totalTokens)}`
               : "No usage data"
           }
           icon={Icon.Coins}
-        />
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title="Actions">
-        <MenuBarExtra.Item title="Open Claude Code" icon={Icon.Globe} onAction={() => open("https://claude.ai/code")} />
-        <MenuBarExtra.Item
-          title="Open Usage Monitor"
-          icon={Icon.BarChart}
           onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
-        />
-        <MenuBarExtra.Item
-          title="ccusage Repository"
-          icon={Icon.Code}
-          onAction={() => open("https://github.com/ryoppippi/ccusage")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
