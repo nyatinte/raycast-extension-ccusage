@@ -1,7 +1,7 @@
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { ReactNode } from "react";
-import { SessionData } from "../types/usage-types";
-import { formatTokens, formatCost, formatRelativeTime, formatModelName } from "../utils/data-formatter";
+import { SessionData, Preferences } from "../types/usage-types";
+import { formatTokens, formatCost, formatRelativeTime, formatRelativeTimeWithTimezone, formatModelName } from "../utils/data-formatter";
 import {
   calculateAverageSessionCost,
   calculateAverageSessionTokens,
@@ -17,6 +17,7 @@ type SessionUsageProps = {
 };
 
 export default function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
+  const preferences = getPreferenceValues<Preferences>();
   const getDetailMetadata = (): ReactNode => {
     if (error) {
       return (
@@ -76,7 +77,7 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
           <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
             title={`Session ${index + 1}`}
-            text={`${formatModelName(session.model)} • ${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTime(session.startTime || session.lastActivity)}`}
+            text={`${formatModelName(session.model)} • ${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTimeWithTimezone(session.startTime || session.lastActivity, preferences.timezone)}`}
             icon={{ source: getModelIcon(session.model || ""), tintColor: getModelIconColor(session.model || "") }}
           />
         ))}

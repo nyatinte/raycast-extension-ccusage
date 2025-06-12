@@ -113,9 +113,17 @@ export const UsageStatsSchema = z.object({
   error: z.string().optional(),
 });
 
+// Preferences schema for Raycast extension settings
+export const PreferencesSchema = z.object({
+  runtimeType: z.enum(["npx", "bunx", "pnpm", "deno"]).default("npx"),
+  customRuntimePath: z.string().optional(),
+  timezone: z.string().default("UTC"),
+});
+
 // Export types inferred from schemas
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
 export type SessionData = z.infer<typeof SessionDataSchema>;
 export type ModelUsage = z.infer<typeof ModelUsageSchema>;
 export type CCUsageOutput = z.infer<typeof CCUsageOutputSchema>;
 export type UsageStats = z.infer<typeof UsageStatsSchema>;
+export type Preferences = z.infer<typeof PreferencesSchema>;

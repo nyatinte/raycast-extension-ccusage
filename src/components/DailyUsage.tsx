@@ -1,6 +1,6 @@
-import { List, Icon, ActionPanel, Action, Color } from "@raycast/api";
-import { DailyUsageData } from "../types/usage-types";
-import { formatTokens, formatCost, formatDate, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
+import { List, Icon, ActionPanel, Action, Color, getPreferenceValues } from "@raycast/api";
+import { DailyUsageData, Preferences } from "../types/usage-types";
+import { formatTokens, formatCost, formatDate, formatDateWithTimezone, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
 import { getUsageIntensity } from "../utils/usage-calculator";
 import { ReactNode } from "react";
 
@@ -12,6 +12,7 @@ type DailyUsageProps = {
 };
 
 export default function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
+  const preferences = getPreferenceValues<Preferences>();
   const getTrendIcon = (usage: DailyUsageData | null): Icon => {
     if (!usage) return Icon.Calendar;
 
@@ -73,7 +74,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
 
     return (
       <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="Date" text={formatDate(dailyUsage.date)} icon={Icon.Calendar} />
+        <List.Item.Detail.Metadata.Label title="Date" text={formatDateWithTimezone(dailyUsage.date, preferences.timezone)} icon={Icon.Calendar} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />
@@ -113,7 +114,7 @@ export default function DailyUsage({ dailyUsage, isLoading, error, settingsActio
   return (
     <List.Item
       id="daily"
-      title={dailyUsage ? `Today (${formatDate(dailyUsage.date)})` : "Today"}
+      title={dailyUsage ? `Today (${formatDateWithTimezone(dailyUsage.date, preferences.timezone)})` : "Today"}
       icon={{ source: getTrendIcon(dailyUsage), tintColor: getTrendColor(dailyUsage) }}
       accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
