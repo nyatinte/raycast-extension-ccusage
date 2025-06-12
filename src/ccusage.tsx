@@ -1,9 +1,10 @@
-import { List, Icon, Action, ActionPanel, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
 import DailyUsage from "./components/DailyUsage";
 import SessionUsage from "./components/SessionUsage";
 import CostAnalysis from "./components/CostAnalysis";
 import ModelBreakdown from "./components/ModelBreakdown";
+import ErrorState from "./components/ErrorState";
 
 type Preferences = {
   defaultView: string;
@@ -22,40 +23,12 @@ export default function ccusage() {
   }
 
   if (!isAvailable) {
-    return (
-      <List>
-        <List.Item
-          title="ccusageが利用できません"
-          subtitle="PreferencesでJavaScriptランタイム（npx, pnpm, etc...）を選択し、パスを設定してください"
-          icon={Icon.ExclamationMark}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Preferencesで設定する"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-              />
-              <Action.OpenInBrowser title="Ccusageについて詳しく" url="https://github.com/ryoppippi/ccusage" />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <ErrorState />;
   }
 
   const selectedItemId = preferences.defaultView || "daily";
 
-  const settingsActions = (
-    <>
-      <Action
-        title="Open Preferences"
-        icon={Icon.Gear}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-        onAction={openExtensionPreferences}
-      />
-    </>
-  );
+  const settingsActions = null;
 
   return (
     <List isLoading={stats.isLoading} selectedItemId={selectedItemId} isShowingDetail>
