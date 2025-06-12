@@ -36,6 +36,9 @@ ccusage CLI tool → useExec hooks → Pure Functions → UI Components
 # Build extension for production
 npm run build
 
+# Develop with hot reload (for extension testing)
+npm run dev
+
 # Run type checking
 npm run typecheck
 
@@ -110,9 +113,10 @@ Each major UI section is a focused component:
 
 The extension requires the `ccusage` npm package available via `npx ccusage@latest`:
 
-- Commands: `daily --json`, `session --json`, `--json`
-- JSON output format with fields: `inputTokens`, `outputTokens`, `totalTokens`, `cost`, `sessions`
+- Commands: `daily --json`, `session --json`, `monthly --json`, `--json`
+- JSON output format with fields: `inputTokens`, `outputTokens`, `totalTokens`, `cost`, `sessions`, `cacheCreationTokens`, `cacheReadTokens`
 - Local file access to Claude Code usage history
+- Model breakdown support via `modelBreakdowns` field with `modelName` property
 
 ## File Organization
 
@@ -195,3 +199,9 @@ The extension includes a runtime settings system that allows users to configure 
 - **Dependency Management**: Use knip to detect unused dependencies and exports
 - **Pre-commit Check**: Run `npm run knip` before committing to ensure clean codebase
 - **No Debug Code**: Remove console.log statements before commits
+
+## Development Status
+
+- **Under Development**: Extension is actively being developed with experimental features
+- **Unofficial**: Not affiliated with Anthropic or ccusage maintainers
+- **Raycast Store**: Use `npm run publish` to submit to Raycast Store (not npm publish)
