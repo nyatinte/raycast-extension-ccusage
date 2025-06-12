@@ -7,7 +7,6 @@ import {
   calculateAverageSessionTokens,
   calculateEfficiencyMetrics,
 } from "../utils/usage-calculator";
-import { getModelIcon, getModelIconColor } from "../utils/model-utils";
 
 type SessionUsageProps = {
   sessions: SessionData[];
@@ -80,9 +79,8 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
         {sessions.slice(0, 5).map((session, index) => (
           <List.Item.Detail.Metadata.Label
             key={session.sessionId || index}
-            title={`Session ${index + 1}`}
-            text={`${formatModelName(session.model)} • ${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTimeWithTimezone(session.startTime || session.lastActivity, preferences.timezone)}`}
-            icon={{ source: getModelIcon(session.model || ""), tintColor: getModelIconColor(session.model || "") }}
+            title={session.sessionId}
+            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.cost)} • ${formatRelativeTimeWithTimezone(session.startTime || session.lastActivity, preferences.timezone)}`}
           />
         ))}
       </List.Item.Detail.Metadata>
