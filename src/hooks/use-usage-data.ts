@@ -9,7 +9,7 @@ import {
   MonthlyUsageData,
   SessionData,
 } from "../types/usage-types";
-import { getRecentSessions } from "../utils/usage-calculator";
+import { getRecentSessions, calculateModelUsage } from "../utils/usage-calculator";
 
 function getEnhancedNodePaths(): string {
   const isAppleSilicon = cpus()[0]?.model?.includes("Apple") ?? false;
@@ -177,13 +177,18 @@ export function useSessionUsage(refreshInterval: number = 15000) {
       const parsed: CCUsageOutput = JSON.parse(rawData);
       const sessions = parsed.sessions || [];
 
-      data = sessions.map((session) => ({
-        ...session,
-        cost: session.totalCost || session.cost || 0,
-        startTime: session.lastActivity,
-        model: session.model || "claude-3-5-sonnet-20241022",
-        projectName: session.projectPath?.split("/").pop() || "Unknown Project",
-      }));
+      data = sessions.map((session) => {
+        // Extract model from modelBreakdowns (ccusage actual structure)
+        const primaryModel = session.modelBreakdowns?.[0]?.modelName || session.modelsUsed?.[0] || "unknown";
+
+        return {
+          ...session,
+          cost: session.totalCost || session.cost || 0,
+          startTime: session.lastActivity,
+          model: primaryModel,
+          projectName: session.projectPath?.split("/").pop() || "Unknown Project",
+        };
+      });
     } catch (parseError) {
       console.error("Failed to parse session usage:", parseError);
     }
@@ -205,7 +210,7 @@ export function useUsageStats(refreshInterval: number = 5000): UsageStats & { re
     todayUsage: dailyUsage.data,
     totalUsage: totalUsage.data,
     recentSessions: sessionUsage.data ? getRecentSessions(sessionUsage.data, 5) : [],
-    topModels: [], // TODO: Calculate from sessions
+    topModels: sessionUsage.data ? calculateModelUsage(sessionUsage.data) : [],
     isLoading: totalUsage.isLoading || dailyUsage.isLoading || sessionUsage.isLoading,
     error: totalUsage.error?.message || dailyUsage.error?.message || sessionUsage.error?.message,
   };

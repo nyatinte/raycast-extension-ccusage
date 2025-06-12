@@ -31,6 +31,32 @@ export const calculateAverageSessionTokens = (sessions: SessionData[]): number =
   return totalTokens / sessions.length;
 };
 
+export const calculateModelUsage = (sessions: SessionData[]): ModelUsage[] => {
+  const modelMap = new Map<string, ModelUsage>();
+
+  sessions.forEach((session) => {
+    const model = session.model || "unknown";
+    const existing = modelMap.get(model) || {
+      model,
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      cost: 0,
+      sessionCount: 0,
+    };
+
+    existing.inputTokens += session.inputTokens || 0;
+    existing.outputTokens += session.outputTokens || 0;
+    existing.totalTokens += session.totalTokens || 0;
+    existing.cost += session.cost || 0;
+    existing.sessionCount += 1;
+
+    modelMap.set(model, existing);
+  });
+
+  return Array.from(modelMap.values()).sort((a, b) => b.totalTokens - a.totalTokens);
+};
+
 export const calculateEfficiencyMetrics = (
   sessions: SessionData[],
 ): {
@@ -56,7 +82,7 @@ export const calculateEfficiencyMetrics = (
   // Find most efficient model (lowest cost per output token)
   const modelEfficiency = new Map<string, { cost: number; output: number }>();
   sessions.forEach((session) => {
-    const model = session.model || "claude-sonnet-4-20250514";
+    const model = session.model || "unknown";
     const existing = modelEfficiency.get(model) || { cost: 0, output: 0 };
     existing.cost += session.cost;
     existing.output += session.outputTokens;

@@ -55,12 +55,14 @@ export const formatModelName = (model: string | null | undefined): string => {
   return match(model)
     .with("claude-opus-4-20250514", "claude-opus-4-0", () => "Claude Opus 4")
     .with("claude-sonnet-4-20250514", "claude-sonnet-4-0", () => "Claude Sonnet 4")
+    .with("claude-3-7-sonnet-20250219", () => "Claude 3.7 Sonnet")
     .with("claude-3-5-sonnet-20241022", () => "Claude 3.5 Sonnet")
     .with("claude-3-5-sonnet-20240620", () => "Claude 3.5 Sonnet (Legacy)")
+    .with("claude-3-5-haiku-20241022", () => "Claude 3.5 Haiku")
     .with("claude-3-opus-20240229", () => "Claude 3 Opus")
     .with("claude-3-sonnet-20240229", () => "Claude 3 Sonnet")
     .with("claude-3-haiku-20240307", () => "Claude 3 Haiku")
-    .otherwise(() => model);
+    .otherwise(() => "Unknown Model");
 };
 
 export const getTokenEfficiency = (inputTokens: number, outputTokens: number): string => {

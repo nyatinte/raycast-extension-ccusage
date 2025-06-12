@@ -23,7 +23,20 @@ export const SessionDataSchema = z.object({
   totalTokens: z.number(),
   totalCost: z.number(),
   cost: z.number(), // Alias for totalCost for compatibility
-  model: z.string().optional(), // Optional since ccusage doesn't provide this
+  modelsUsed: z.array(z.string()).optional(), // From ccusage
+  modelBreakdowns: z
+    .array(
+      z.object({
+        modelName: z.string(), // ccusage uses modelName, not model
+        inputTokens: z.number(),
+        outputTokens: z.number(),
+        cacheCreationTokens: z.number().optional(),
+        cacheReadTokens: z.number().optional(),
+        cost: z.number(),
+      }),
+    )
+    .optional(),
+  model: z.string().optional(), // Derived field for UI compatibility
   startTime: z.string().optional(), // Derived from lastActivity for compatibility
   endTime: z.string().optional(),
   projectName: z.string().optional(),
