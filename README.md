@@ -1,7 +1,7 @@
+# Claude Code Usage (ccusage)
+
 <div align="center">
   <img src="assets/extension-icon.png" alt="Claude Code Usage Icon" width="128" height="128">
-  
-  # Claude Code Usage (ccusage)
   
   A Raycast extension that provides real-time monitoring of Claude Code usage statistics using the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool.
   
@@ -24,19 +24,23 @@ Monitor your Claude Code usage with comprehensive real-time statistics:
 ## Screenshots
 
 ### Main Usage View
-![Claude Code Usage](assets/ccusage.png)
+
+![Claude Code Usage](media/ccusage-today.png)
 
 ### Menu Bar Integration
-![Menu Bar Usage](assets/menubar-ccusage.png)
+
+![Menu Bar Usage](media/menubar-ccusage.png)
 
 ### Preferences
-![Preferences](assets/preference.png)
+
+![Preferences](media/preference.png)
 
 ## Requirements
 
 This extension requires the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool to function properly. The extension will automatically attempt to install and run ccusage using your preferred JavaScript runtime.
 
 ### Supported Runtimes
+
 - **npx** (Node Package Execute) - Default
 - **bunx** (Bun Package Execute)
 - **pnpm dlx** (PNPM Package Execute)
