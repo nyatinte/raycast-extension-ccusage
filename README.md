@@ -25,15 +25,7 @@ Monitor your Claude Code usage with comprehensive real-time statistics:
 
 ### Main Usage View
 
-![Claude Code Usage](media/ccusage-today.png)
-
-### Menu Bar Integration
-
-![Menu Bar Usage](media/menubar-ccusage.png)
-
-### Preferences
-
-![Preferences](media/preference.png)
+![Claude Code Usage](metadata/ccusage-2.png)
 
 ## Requirements
 
