@@ -15,7 +15,7 @@ type SessionUsageProps = {
   settingsActions?: ReactNode;
 };
 
-export default function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
+export function SessionUsage({ sessions, isLoading, error, settingsActions }: SessionUsageProps) {
   const preferences = getPreferenceValues<Preferences>();
   const getDetailMetadata = (): ReactNode => {
     if (error) {

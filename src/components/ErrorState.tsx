@@ -5,7 +5,7 @@ type ErrorStateProps = {
   actions?: ReactNode;
 };
 
-export default function ErrorState({ actions }: ErrorStateProps) {
+export function ErrorState({ actions }: ErrorStateProps) {
   const markdown = `
 # 🚨 ccusage Command Not Available
 

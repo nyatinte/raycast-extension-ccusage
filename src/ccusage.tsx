@@ -1,10 +1,10 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useUsageStats, useccusageAvailability } from "./hooks/use-usage-data";
-import DailyUsage from "./components/DailyUsage";
-import SessionUsage from "./components/SessionUsage";
-import CostAnalysis from "./components/CostAnalysis";
-import ModelBreakdown from "./components/ModelBreakdown";
-import ErrorState from "./components/ErrorState";
+import { DailyUsage } from "./components/DailyUsage";
+import { SessionUsage } from "./components/SessionUsage";
+import { CostAnalysis } from "./components/CostAnalysis";
+import { ModelBreakdown } from "./components/ModelBreakdown";
+import { ErrorState } from "./components/ErrorState";
 
 type Preferences = {
   defaultView: string;

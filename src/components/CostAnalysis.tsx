@@ -12,14 +12,7 @@ type CostAnalysisProps = {
   settingsActions?: ReactNode;
 };
 
-export default function CostAnalysis({
-  totalUsage,
-  dailyUsage,
-  models,
-  isLoading,
-  error,
-  settingsActions,
-}: CostAnalysisProps) {
+export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error, settingsActions }: CostAnalysisProps) {
   const getCostIcon = (cost: number): Icon => {
     if (cost === 0) return Icon.Circle;
     if (cost < 1) return Icon.Coins;

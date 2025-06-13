@@ -17,7 +17,7 @@ type DailyUsageProps = {
   settingsActions?: ReactNode;
 };
 
-export default function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
+export function DailyUsage({ dailyUsage, isLoading, error, settingsActions }: DailyUsageProps) {
   const preferences = getPreferenceValues<Preferences>();
   const getTrendIcon = (usage: DailyUsageData | null): Icon => {
     if (!usage) return Icon.Calendar;
