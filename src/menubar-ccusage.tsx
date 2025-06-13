@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, Color, open, openExtensionPreferences, Image } from "@raycast/api";
+import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useccusageAvailability } from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
