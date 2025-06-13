@@ -24,13 +24,13 @@ export const formatTokensAsMTok = (tokens: number | null | undefined): string =>
 };
 
 export const formatCost = (cost: number | null | undefined): string => {
-  if (cost === null || cost === undefined) return "$0.0";
+  if (cost === null || cost === undefined) return "$0.00";
 
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(cost);
 };
 
