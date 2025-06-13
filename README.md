@@ -1,6 +1,13 @@
-# Claude Code Usage (ccusage)
-
-A Raycast extension that provides real-time monitoring of Claude Code usage statistics using the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool.
+<div align="center">
+  <img src="assets/extension-icon.png" alt="Claude Code Usage Icon" width="128" height="128">
+  
+  # Claude Code Usage (ccusage)
+  
+  A Raycast extension that provides real-time monitoring of Claude Code usage statistics using the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool.
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Raycast Extension](https://img.shields.io/badge/Raycast-Extension-red.svg)](https://raycast.com/)
+</div>
 
 ## Features
 
