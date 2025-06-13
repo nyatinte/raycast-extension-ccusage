@@ -34,16 +34,6 @@ export const formatCost = (cost: number | null | undefined): string => {
   }).format(cost);
 };
 
-export const formatDate = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return isValid(date) ? format(date, "yyyy/MM/dd") : dateString;
-};
-
-export const formatRelativeTime = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return isValid(date) ? formatDistanceToNow(date, { addSuffix: true }) : dateString;
-};
-
 export const getTokenEfficiency = (inputTokens: number, outputTokens: number): string => {
   if (inputTokens === 0) return "N/A";
   const ratio = outputTokens / inputTokens;
