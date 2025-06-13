@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, Color, open, openExtensionPreferences } from "@raycast/api";
+import { MenuBarExtra, Icon, Color, open, openExtensionPreferences, Image } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useccusageAvailability } from "./hooks/use-usage-data";
 import { formatCost, formatTokensAsMTok } from "./utils/data-formatter";
@@ -24,14 +24,6 @@ const getEnhancedNodePaths = (): string => {
   const allPaths = [process.env.PATH || "", ...platformPaths, ...versionManagerPaths, ...systemPaths];
 
   return allPaths.filter((path) => path).join(":");
-};
-
-const getCostBasedIcon = (cost: number): { tintColor: "SecondaryText" | "Green" | "Yellow" | "Orange" | "Red" } => {
-  if (cost === 0) return { tintColor: "SecondaryText" as const };
-  if (cost < 1) return { tintColor: "Green" as const };
-  if (cost < 5) return { tintColor: "Yellow" as const };
-  if (cost < 20) return { tintColor: "Orange" as const };
-  return { tintColor: "Red" as const };
 };
 
 type UsageEntry = {
@@ -193,14 +185,8 @@ export default function MenuBarccusage() {
   }
 
   // Calculate menu bar icon based on daily usage
-  const getMenuBarIcon = (): { source: Icon; tintColor: Color } => {
-    if (!usageData?.dailyUsage) {
-      return { source: Icon.Coins, tintColor: Color.SecondaryText };
-    }
-
-    const cost = usageData.dailyUsage.cost || 0;
-    const colorConfig = getCostBasedIcon(cost);
-    return { source: Icon.Coins, tintColor: Color[colorConfig.tintColor] };
+  const getMenuBarIcon = () => {
+    return { source: "extension-icon.png" };
   };
 
   const getTooltip = (): string => {
