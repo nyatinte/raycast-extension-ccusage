@@ -3,7 +3,7 @@ import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from
 import { ModelUsage } from "../types/usage-types";
 import { formatTokens, formatCost, formatModelName, getCostPerMTok } from "../utils/data-formatter";
 import { getTopModels } from "../utils/usage-calculator";
-import { getModelIcon, getModelIconColor, groupModelsByTier } from "../utils/model-utils";
+import { groupModelsByTier } from "../utils/model-utils";
 
 type ModelBreakdownProps = {
   models: ModelUsage[];
@@ -74,10 +74,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
             <List.Item.Detail.Metadata.Label
               title="Most Efficient Model"
               text={formatModelName(mostEfficientModel.model)}
-              icon={{
-                source: getModelIcon(mostEfficientModel.model),
-                tintColor: getModelIconColor(mostEfficientModel.model),
-              }}
+              icon={Icon.Star}
             />
             <List.Item.Detail.Metadata.Label
               title="Cost per MTok"
@@ -101,7 +98,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
                       key={`${tier}-${model.model || "unknown"}-${index}`}
                       title={formatModelName(model.model)}
                       text={`${formatTokens(model.totalTokens)} (${percentage}) • ${formatCost(model.cost)} • ${model.sessionCount} sessions`}
-                      icon={{ source: getModelIcon(model.model), tintColor: getModelIconColor(model.model) }}
+                      icon={Icon.Star}
                     />
                   );
                 })}
@@ -119,7 +116,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
               key={`top-${model.model || "unknown"}-${index}`}
               title={`${index + 1}. ${formatModelName(model.model)}`}
               text={`${formatTokens(model.totalTokens)} • ${formatCost(model.cost)} • ${costPerMTok}`}
-              icon={{ source: getModelIcon(model.model), tintColor: getModelIconColor(model.model) }}
+              icon={Icon.Star}
             />
           );
         })}
