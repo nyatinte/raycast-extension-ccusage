@@ -13,22 +13,6 @@ type CostAnalysisProps = {
 };
 
 export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error, settingsActions }: CostAnalysisProps) {
-  const getCostIcon = (cost: number): Icon => {
-    if (cost === 0) return Icon.Circle;
-    if (cost < 1) return Icon.Coins;
-    if (cost < 10) return Icon.BankNote;
-    if (cost < 50) return Icon.CreditCard;
-    return Icon.Calculator;
-  };
-
-  const getCostColor = (cost: number): Color => {
-    if (cost === 0) return Color.SecondaryText;
-    if (cost < 1) return Color.Green;
-    if (cost < 10) return Color.Yellow;
-    if (cost < 50) return Color.Orange;
-    return Color.Red;
-  };
-
   const getDetailMetadata = (): ReactNode => {
     if (error) {
       return (
@@ -147,8 +131,6 @@ export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error,
     );
   };
 
-  const mainCost = totalUsage?.cost || 0;
-
   const getAccessories = (): List.Item.Accessory[] => {
     if (error) {
       return [{ text: "Setup required", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } }];
@@ -165,7 +147,7 @@ export function CostAnalysis({ totalUsage, dailyUsage, models, isLoading, error,
     <List.Item
       id="cost-analysis"
       title="Costs"
-      icon={{ source: getCostIcon(mainCost), tintColor: getCostColor(mainCost) }}
+      icon={Icon.Coins}
       accessories={getAccessories()}
       detail={<List.Item.Detail isLoading={isLoading} metadata={getDetailMetadata()} />}
       actions={
