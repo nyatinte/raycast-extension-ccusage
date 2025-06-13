@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { ModelUsage } from "../types/usage-types";
-import { formatTokens, formatCost, formatModelName, getCostPerMTok } from "../utils/data-formatter";
+import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 import { getTopModels } from "../utils/usage-calculator";
 import { groupModelsByTier } from "../utils/model-utils";
 
@@ -73,7 +73,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
             <List.Item.Detail.Metadata.Label title="Efficiency Analysis" />
             <List.Item.Detail.Metadata.Label
               title="Most Efficient Model"
-              text={formatModelName(mostEfficientModel.model)}
+              text={mostEfficientModel.model || "Unknown Model"}
               icon={Icon.Star}
             />
             <List.Item.Detail.Metadata.Label
@@ -96,7 +96,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
                   return (
                     <List.Item.Detail.Metadata.Label
                       key={`${tier}-${model.model || "unknown"}-${index}`}
-                      title={formatModelName(model.model)}
+                      title={model.model || "Unknown Model"}
                       text={`${formatTokens(model.totalTokens)} (${percentage}) • ${formatCost(model.cost)} • ${model.sessionCount} sessions`}
                       icon={Icon.Star}
                     />
@@ -114,7 +114,7 @@ export default function ModelBreakdown({ models, isLoading, error, settingsActio
           return (
             <List.Item.Detail.Metadata.Label
               key={`top-${model.model || "unknown"}-${index}`}
-              title={`${index + 1}. ${formatModelName(model.model)}`}
+              title={`${index + 1}. ${model.model || "Unknown Model"}`}
               text={`${formatTokens(model.totalTokens)} • ${formatCost(model.cost)} • ${costPerMTok}`}
               icon={Icon.Star}
             />

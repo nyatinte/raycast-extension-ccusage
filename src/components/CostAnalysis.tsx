@@ -1,7 +1,7 @@
 import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { ReactNode } from "react";
 import { DailyUsageData, ModelUsage } from "../types/usage-types";
-import { formatTokens, formatCost, getCostPerMTok, formatModelName } from "../utils/data-formatter";
+import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 
 type CostAnalysisProps = {
   totalUsage: { inputTokens: number; outputTokens: number; totalTokens: number; cost: number } | null;
@@ -130,7 +130,7 @@ export default function CostAnalysis({
         {costBreakdown.breakdown.slice(0, 5).map((model, index) => (
           <List.Item.Detail.Metadata.Label
             key={`cost-${model.model || "unknown"}-${index}`}
-            title={formatModelName(model.model)}
+            title={model.model || "Unknown Model"}
             text={`${formatCost(model.cost)} (${model.percentage})`}
             icon={Icon.Star}
           />
@@ -143,7 +143,7 @@ export default function CostAnalysis({
             {tokenBreakdown.breakdown.slice(0, 3).map((model, index) => (
               <List.Item.Detail.Metadata.Label
                 key={`token-${model.model || "unknown"}-${index}`}
-                title={formatModelName(model.model)}
+                title={model.model || "Unknown Model"}
                 text={`${formatTokens(model.tokens)} (${model.percentage})`}
                 icon={Icon.Text}
               />

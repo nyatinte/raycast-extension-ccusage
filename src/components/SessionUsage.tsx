@@ -1,7 +1,7 @@
 import { List, Icon, ActionPanel, Action, getPreferenceValues, openExtensionPreferences, Color } from "@raycast/api";
 import { ReactNode } from "react";
 import { SessionData, Preferences } from "../types/usage-types";
-import { formatTokens, formatCost, formatRelativeTimeWithTimezone, formatModelName } from "../utils/data-formatter";
+import { formatTokens, formatCost, formatRelativeTimeWithTimezone } from "../utils/data-formatter";
 import {
   calculateAverageSessionCost,
   calculateAverageSessionTokens,
@@ -67,7 +67,7 @@ export default function SessionUsage({ sessions, isLoading, error, settingsActio
         {efficiency.mostEfficientModel && (
           <List.Item.Detail.Metadata.Label
             title="Most Efficient Model"
-            text={formatModelName(efficiency.mostEfficientModel)}
+            text={efficiency.mostEfficientModel || "Unknown Model"}
           />
         )}
         <List.Item.Detail.Metadata.Separator />

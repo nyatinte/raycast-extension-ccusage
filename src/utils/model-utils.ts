@@ -1,4 +1,3 @@
-
 export const groupModelsByTier = <T extends { model: string }>(models: T[]) => {
   const getModelTier = (model: string): "Premium" | "Standard" | "Fast" | "Unknown" => {
     const modelName = model.toLowerCase();
