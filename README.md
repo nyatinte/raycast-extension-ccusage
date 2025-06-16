@@ -1,5 +1,7 @@
 # Claude Code Usage (ccusage)
 
+**English** | [日本語](README.ja.md)
+
 > [!IMPORTANT]
 > **This repository has been archived and is no longer maintained.**
 > 
