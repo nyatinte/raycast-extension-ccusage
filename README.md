@@ -1,5 +1,12 @@
 # Claude Code Usage (ccusage)
 
+> [!IMPORTANT]
+> **This repository has been archived and is no longer maintained.**
+> 
+> The extension has been moved to: https://github.com/nyatinte/extensions/tree/ext/ccusage/extensions/ccusage
+> 
+> Please visit the new location for the latest updates, issues, and support.
+
 <div align="center">
   <img src="assets/extension-icon.png" alt="Claude Code Usage Icon" width="128" height="128">
   
@@ -53,7 +60,7 @@ This extension requires the [ccusage](https://github.com/ryoppippi/ccusage) CLI 
 
 ## Support
 
-If you encounter any issues or have suggestions, please [create an issue](https://github.com/nyatinte/raycast-ccusage/issues) in the repository.
+If you encounter any issues or have suggestions, please [create an issue](https://github.com/nyatinte/extensions/issues) in the new repository.
 
 ## Credits
 
