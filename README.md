@@ -5,9 +5,11 @@
 > [!IMPORTANT]
 > **This repository has been archived and is no longer maintained.**
 > 
-> The extension has been moved to: https://github.com/nyatinte/extensions/tree/ext/ccusage/extensions/ccusage
+> The extension has been moved to: https://github.com/raycast/extensions/tree/main/extensions/ccusage
 > 
 > Please visit the new location for the latest updates, issues, and support.
+>
+> <a title="Install ccusage Raycast Extension" href="https://www.raycast.com/nyatinte/ccusage"><img src="https://www.raycast.com/nyatinte/ccusage/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 <div align="center">
   <img src="assets/extension-icon.png" alt="Claude Code Usage Icon" width="128" height="128">
